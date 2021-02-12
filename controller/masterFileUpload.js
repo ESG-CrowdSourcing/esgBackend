@@ -1,4 +1,3 @@
-var excleData = require('../controller/constant')
 var category = require('../controller/category')
 var categorySchema = require('../model/category')
 var theameController = require('../controller/theme')
@@ -6,9 +5,7 @@ var keyController = require('../controller/keyIssues')
 var dataController = require('../controller/data')
 var multipleFileuploadController = require('../controller/multipleFileupload')
 var subcriptionController = require('../controller/subcription')
-const theme = require('../model/theme')
-var excelData = require('convert-excel-to-json')
-var jsonData = require('./json')
+
 var titleSchema = require('../model/companyTitle');
 var masterSchema = require('../model/masterTaxonomy')
 var packageSchema = require('../model/package')
@@ -19,7 +16,6 @@ var _ = require('lodash');
 exports.masterFileLoad = async function (req, res) {
     try {
         for (let fi = 0; fi < req.files.length; fi++) {
-
             let standardData = await multipleFileuploadController.sheetOne(req.files[fi].path);
             for (let i = 0; i < standardData.companyArr.length; i++) {
                 let company = await category.companyTitle(standardData.companyArr[i]);
@@ -28,6 +24,7 @@ exports.masterFileLoad = async function (req, res) {
                     for (let i = 0; i < standardData.resultArr[j].length; i++) {
                         let catagoty = await category.fileUploadCategory(standardData.companyArr[0], standardData.resultArr[j][i]);
                         let dir = await category.getDirectives(standardData.resultArr[j][i])
+
                         if (dir.length != 0) {
                             let directive = await category.directive(dir, company);
                             if (catagoty.category != null) {
@@ -174,42 +171,43 @@ exports.getNewData = async function (req, res) {
             for (let k = 0; k < keysData.keys.length; k++) {
                 let dataVal = await dataController.getAllData(keysData.keys[k]);
                 result.push(dataVal);
+                return res.status(200).json({
+                    message: 'Success.', status: 200, data: {
+                        companyName: companyData[0].companyName,
+                        companyID: companyData[0].CIN,
+                        NIC_CODE: companyData[0].NIC_Code,
+                        NIC_industry: companyData[0].NIC_industry,
+                        fiscalYear: result
+                    }
+                })
             }
 
         }
-        var mer1 = [];
-        result.forEach(element => {
-            Array.prototype.push.apply(mer1, element);
-        })
-        var mer2 = [];
-        mer1.forEach(element => {
-            Array.prototype.push.apply(mer2, element);
-        })
+        // var mer1 = [];
+        // result.forEach(element => {
+        //     Array.prototype.push.apply(mer1, element);
+        // })
+        // var mer2 = [];
+        // mer1.forEach(element => {
+        //     Array.prototype.push.apply(mer2, element);
+        // })
 
-        var group = _.groupBy(mer2, 'Year')
-        var fisYear = []
-
-
-        if (Object.keys(group).length > 0) {
-            Object.keys(group).forEach(function (key) {
+        // var group = _.groupBy(mer2, 'Year')
+        // var fisYear = []
 
 
-                fisYear.push({ 'Year': key, 'data': group[key] })
-            });
-            fisYear = _.orderBy(fisYear, 'Year')
-        }
+        // if (Object.keys(group).length > 0) {
+        //     Object.keys(group).forEach(function (key) {
+
+
+        //         fisYear.push({ 'Year': key, 'data': group[key] })
+        //     });
+        //     fisYear = _.orderBy(fisYear, 'Year')
+        // }
 
 
 
-        return res.status(200).json({
-            message: 'Success.', status: 200, data: {
-                companyName: companyData[0].companyName,
-                companyID: companyData[0].CIN,
-                NIC_CODE: companyData[0].NIC_Code,
-                NIC_industry: companyData[0].NIC_industry,
-                fiscalYear: fisYear
-            }
-        })
+       
     } catch (error) {
         console.log('error=====>', error);
         return error;

@@ -9,7 +9,6 @@ var titleSchema = require('../model/companyTitle')
 var subscription = require('../controller/subcription')
 var directiveSchema = require('../model/dir')
 
-debugger
 exports.masterTaxonomy = ( masterData) => {
     return new Promise(async (resolve, reject) => {file
         dataSchema.find({ dataID: masterData._id }).exec().then(data => {
@@ -38,7 +37,7 @@ exports.masterTaxonomy = ( masterData) => {
 exports.companyTitle = (titleData) => {
     return new Promise(async (resolve, reject) => {
 
-        titleSchema.find({ companyName: titleData[0].CompanyName }).exec().then(data => {
+        let data = await titleSchema.find({ companyName: titleData[0].CompanyName }).exec()
             if (data.length >= 1) {
                 resolve(data[0])
             }
@@ -62,7 +61,7 @@ exports.companyTitle = (titleData) => {
                     resolve(response)
                 });
             }
-        })
+        
 
     })
 
@@ -122,9 +121,9 @@ exports.fileUploadTheme = (caragoryData) => {
 
 exports.fileUploadKeyIssue = ( caragoryData) => {
     return new Promise(async (resolve, reject) => {
-        categorySchema.findOne({ category: caragoryData.Category }).exec().then(data => {
-            keySchema.find({ keyIssues: caragoryData['Key Issues']}).exec().then(keyData => {
-                if (keyData.length >= 1) {
+       let data = await categorySchema.findOne({ category: caragoryData.Category }).exec()
+            let keyData = await keySchema.find({ keyIssues: caragoryData['Key Issues']}).exec()
+           if (keyData.length >= 1) {
                     resolve(keyData[0])
                 }
                 else {
@@ -136,9 +135,7 @@ exports.fileUploadKeyIssue = ( caragoryData) => {
                         resolve(themed);
                     });
                 }
-            })
-        })
-    });
+                });
 }
 
 async function file(caragoryData,dir,data){
@@ -170,12 +167,19 @@ async function file(caragoryData,dir,data){
 exports.fileUploadMaster = (dir, caragoryData) => {
     return new Promise(async (resolve, reject) => {
        let data = await keySchema.findOne({ keyIssues:caragoryData['Key Issues'] }).exec() 
-          if(dir.length >1 ){
-            let key= await file(caragoryData,dir,data)
+       let dpcode = await dataSchema.find({ DPCode : caragoryData['DP Code']}).exec()
+             
+       if(dpcode.length >= 2 ) {
+           resolve(dpcode[0])
+       }
+       else{
+
+        //   if(dir.length >1 ){
+        //     let key= await file(caragoryData,dir,data)
        
-            resolve(key)
-          }
-          else{
+        //     resolve(key)
+        //   }
+        //   else{
 
           const dataSche = new dataSchema({
             _id: new mongoose.Types.ObjectId(),
@@ -193,7 +197,8 @@ exports.fileUploadMaster = (dir, caragoryData) => {
         }).save().then(response=>{
             resolve(response)
         })
-    }     
+    // } 
+       }   
         
     });
 }
