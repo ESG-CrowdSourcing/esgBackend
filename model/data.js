@@ -3,6 +3,10 @@ var schema = mongoose.Schema;
 
 var dataSchema = new schema({
     _id: mongoose.Schema.Types.ObjectId,
+    companyName:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CompanyTitle'
+    },
     keyIssuesID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Key'

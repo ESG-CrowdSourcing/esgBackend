@@ -37,8 +37,8 @@ exports.masterTaxonomy = ( masterData) => {
 exports.companyTitle = (titleData) => {
     return new Promise(async (resolve, reject) => {
 
-        let data = await titleSchema.find({ companyName: titleData[0].CompanyName }).exec()
-            if (data.length >= 1) {
+        let data = await titleSchema.find({ companyName: titleData[0]['Company Name'] }).exec()
+            if (data.length > 1) {
                 resolve(data[0])
             }
             else {
@@ -69,6 +69,8 @@ exports.companyTitle = (titleData) => {
 
 exports.fileUploadCategory = (company, caragoryData) => {
     return new Promise(async (resolve, reject) => {
+        console.log(".............",company)
+
         titleSchema.findOne({ companyName: company[0]['Company Name'] }).exec().then(titleData => {
             categorySchema.find({ category: caragoryData.Category }).exec().then(data => {
             
@@ -164,10 +166,12 @@ async function file(caragoryData,dir,data){
     return s
 }
 
-exports.fileUploadMaster = (dir, caragoryData) => {
+exports.fileUploadMaster = (company,dir, caragoryData) => {
     return new Promise(async (resolve, reject) => {
+        console.log(".............",company)
+        let titleData = await titleSchema.findOne({ companyName: company[0]['Company Name'] }).exec()
        let data = await keySchema.findOne({ keyIssues:caragoryData['Key Issues'] }).exec() 
-       let dpcode = await dataSchema.find({ DPCode : caragoryData['DP Code']}).exec()
+       let dpcode = await dataSchema.find({companyName: titleData._id, DPCode : caragoryData['DP Code']}).exec()
              
        if(dpcode.length >= 2 ) {
            resolve(dpcode[0])
@@ -183,6 +187,7 @@ exports.fileUploadMaster = (dir, caragoryData) => {
 
           const dataSche = new dataSchema({
             _id: new mongoose.Types.ObjectId(),
+            companyName:titleData._id,
             keyIssuesID: data._id,
             DPCode: caragoryData['DP Code'],
             description: caragoryData['Description'].toString(),

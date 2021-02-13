@@ -1,7 +1,7 @@
 var dataSchema = require('../model/data')
 var mongoose = require('mongoose')
 var directorSchema = require('../model/dir');
-
+var titleSchema = require('../model/companyTitle')
 
 exports.getDirectors =(director)=>{
     return new Promise(async (resolve, reject) => {
@@ -29,13 +29,13 @@ async function file(fiscal){
     }
     return dataValues
 }
-exports.getAllData = (keyIssues) => {
+exports.getAllData = (company) => {
     var dataValues =[], datapoints={}, yearValues=[], yearData={};
     return new Promise(async (resolve, reject) => {
         // let data=await dataSchema.find({keyIssuesID:keyIssues._id}).exec()
-            let year =await dataSchema.find({}).distinct('fiscalYear')
+            let year =await dataSchema.find({companyName: company}).distinct('fiscalYear')
             for(let yr=0; yr < year.length ;yr++){
-            let fiscal = await dataSchema.find({fiscalYear: year[yr]}).exec()
+            let fiscal = await dataSchema.find({companyName: company,fiscalYear: year[yr]}).exec()
              let f = await file(fiscal);
              yearData={ year: year[yr],
                         Data: f}

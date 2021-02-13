@@ -30,7 +30,7 @@ exports.masterFileLoad = async function (req, res) {
                             if (catagoty.category != null) {
                                 let keyIssue = await category.fileUploadKeyIssue(standardData.resultArr[j][i]);
                                 if (keyIssue.keyIssues) {
-                                    let master = await category.fileUploadMaster(dir, standardData.resultArr[j][i]);
+                                    let master = await category.fileUploadMaster(standardData.companyArr[0],dir, standardData.resultArr[j][i]);
                                     if (master.DPCode) {
                                         let taxonomy = await category.masterTaxonomy(standardData.resultArr[j][i]);
                                     }
@@ -43,7 +43,7 @@ exports.masterFileLoad = async function (req, res) {
                             if (catagoty.category != null) {
                                 let keyIssue = await category.fileUploadKeyIssue(standardData.resultArr[j][i]);
                                 if (keyIssue.keyIssues) {
-                                    let master = await category.fileUploadMaster(dir, standardData.resultArr[j][i]);
+                                    let master = await category.fileUploadMaster(standardData.companyArr[0],dir, standardData.resultArr[j][i]);
                                     if (master.DPCode) {
                                         let taxonomy = await category.masterTaxonomy(standardData.resultArr[j][i]);
                                     }
@@ -164,12 +164,12 @@ exports.getNewData = async function (req, res) {
     try {
         let companyData = await titleSchema.find({ companyName: req.params.companyName })
         let result = [], keyVal = [], categoryVal = [], keyName = {}, CategoryName = {};
-        let catagotyData = await category.getNewAllCategory(companyData[0]);
+        //let catagotyData = await category.getNewAllCategory(companyData[0]);
 
-        for (let i = 0; i < catagotyData.category.length; i++) {
-            let keysData = await keyController.getAllKey(catagotyData.category[i]);
-            for (let k = 0; k < keysData.keys.length; k++) {
-                let dataVal = await dataController.getAllData(keysData.keys[k]);
+        // for (let i = 0; i < catagotyData.category.length; i++) {
+        //     let keysData = await keyController.getAllKey(catagotyData.category[i]);
+        //     for (let k = 0; k < keysData.keys.length; k++) {
+                let dataVal = await dataController.getAllData(companyData[0]._id);
                 result.push(dataVal);
                 return res.status(200).json({
                     message: 'Success.', status: 200, data: {
@@ -180,9 +180,9 @@ exports.getNewData = async function (req, res) {
                         fiscalYear: result
                     }
                 })
-            }
+        //     }
 
-        }
+        // }
         // var mer1 = [];
         // result.forEach(element => {
         //     Array.prototype.push.apply(mer1, element);
