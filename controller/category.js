@@ -173,7 +173,7 @@ exports.fileUploadMaster = (company,dir, caragoryData) => {
        let data = await keySchema.findOne({ keyIssues:caragoryData['Key Issues'] }).exec() 
        let dpcode = await dataSchema.find({companyName: titleData._id, DPCode : caragoryData['DP Code']}).exec()
              
-       if(dpcode.length >= 2 ) {
+       if(dpcode.length > 2 ) {
            resolve(dpcode[0])
        }
        else{
