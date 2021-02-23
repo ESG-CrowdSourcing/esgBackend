@@ -1,5 +1,9 @@
 var multer = require('multer');
 var masterFileUpload = require('../controller/masterFileUpload');
+var cmpany = require('../controller/company');
+var master = require('../controller/masterTaxonomy');
+var controversy= require('../controller/controversy')
+var calculation = require('../controller/Calculation');
 module.exports = function (app) {
 
     const storage = multer.diskStorage({
@@ -12,11 +16,17 @@ module.exports = function (app) {
     });
     var xslx = multer({ storage: storage });
 
-    app.route('/taxonomy').post(xslx.array('file', 10), masterFileUpload.masterFileLoad);
-    app.route('/fetchNewCompanynewData/:companyName').get(masterFileUpload.fetchNewCompanynewData);
-    app.route('/fetchExistingCompanyData/:companyName').get(masterFileUpload.fetchNewCompanynewData);
-    app.route('/package/:companyName').get(masterFileUpload.package);
+    app.route('/master').post(xslx.single('file'),master.masterTaxonomy);
+    app.route('/taxonomy').post(xslx.array('file', 10), cmpany.companyDetails);
+    app.route('/controversy').post(xslx.array('file',2),controversy.controversy);
+    app.route('/rule').post(xslx.single('file'),cmpany.rule);
+    app.route('/calculation/:companyName').post(calculation.calc)
+    app.route('/getcontroversy').get(controversy.getControvery);
+
+    // app.route('/fetchNewCompanynewData/:companyName').get(masterFileUpload.fetchNewCompanynewData);
+    // app.route('/fetchExistingCompanyData/:companyName').get(masterFileUpload.fetchNewCompanynewData);
+    // app.route('/package/:companyName').get(masterFileUpload.package);
     app.route('/getNewData/:companyName').get(masterFileUpload.getNewData);
     app.route('/getAllCompany').get(masterFileUpload.getAllCompany)
-    app.route('/getDirectiveData/:companyName').post(masterFileUpload.getNewDataDir);
+    // app.route('/getDirectiveData/:companyName').post(masterFileUpload.getNewDataDir);
 }                   
