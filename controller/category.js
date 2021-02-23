@@ -8,7 +8,11 @@ var masterSchema = require('../model/masterTaxonomy')
 var titleSchema = require('../model/companyTitle')
 var subscription = require('../controller/subcription')
 var directiveSchema = require('../model/dir')
+var dpcodeSchema = require('../model/dpCode')
+var ruleSchema = require('../model/rule');
+const dpCode = require('../model/dpCode');
 
+var controversySchema = require('../model/controversy')
 exports.masterTaxonomy = ( masterData) => {
     return new Promise(async (resolve, reject) => {file
         dataSchema.find({ dataID: masterData._id }).exec().then(data => {
@@ -38,8 +42,32 @@ exports.companyTitle = (titleData) => {
     return new Promise(async (resolve, reject) => {
 
         let data = await titleSchema.find({ companyName: titleData[0]['Company Name'] }).exec()
-            if (data.length > 1) {
-                resolve(data[0])
+            if (data.length > 0) {
+                if(!titleData[0]['Governance Analyst Name'] || !titleData[0]['Environment Analyst Name'] ){
+                    var update ={$set :{
+                        SocialAnalystName: titleData[0]['Social Analyst Name'],
+                        SocialQAName: titleData[0]['Social QA Name']
+                    }}
+                    let updatedData = await titleSchema.updateMany({companyName: titleData[0]['Company Name']},update).exec()
+                    resolve(data[0])
+                }else if (!titleData[0]['Social Analyst Name'] || !titleData[0]['Environment Analyst Name']){
+                    var update ={$set :{
+                        GovernanceAnalystName: titleData[0]['Governance Analyst Name'],
+                        GovernanceQAName: titleData[0]['Governance QA Name'],
+                    }}
+                    let updatedData = await titleSchema.updateMany({companyName: titleData[0]['Company Name']},update).exec()
+                    resolve(data[0])
+                }
+                else{
+                    var update ={$set :{
+                        EnvironmentAnalystName: titleData[0]['Environment Analyst Name'],
+                        EnvironmentQAName: titleData[0]['Environment QA Name'],
+                     
+                    }}
+                    let updatedData = await titleSchema.updateMany({companyName: titleData[0]['Company Name']},update).exec()
+                    resolve(data[0])
+                }
+                
             }
             else {
                 const title = new titleSchema({
@@ -67,43 +95,35 @@ exports.companyTitle = (titleData) => {
 
 }
 
-exports.fileUploadCategory = (company, caragoryData) => {
+exports.fileUploadCategory = (caragoryData) => {
     return new Promise(async (resolve, reject) => {
-        console.log(".............",company)
-
-        titleSchema.findOne({ companyName: company[0]['Company Name'] }).exec().then(titleData => {
-            categorySchema.find({ category: caragoryData.Category }).exec().then(data => {
-            
-                
-                if(caragoryData.Category == null || caragoryData.Category == 'Category' || caragoryData.Category == undefined)
-                {
-                
-                caragoryData.Category == null
-                resolve(caragoryData)
-                }else{
-                
-                if (data.length >= 1) {
+            categorySchema.find({ category: caragoryData['Category'] }).exec().then(data => {
+                            if (data.length >= 1) {
                     resolve(data[0])
-                } else {
+                } 
+                else
+                 {
                     const category = new categorySchema({
                         _id: new mongoose.Types.ObjectId(),
-                        category: caragoryData.Category,
-                        companyID: titleData._id
+                        category: caragoryData['Category'],
+                        categoryCode:caragoryData['Category Code']
                     }).save().then(response => {
                         resolve(response);
                     });
                 }
-            }
+            
+            }).catch(err=>{
+                console.log(err)
             })
-        })
+        
 
     });
 }
 
 exports.fileUploadTheme = (caragoryData) => {
     return new Promise(async (resolve, reject) => {
-        categorySchema.findOne({ category: caragoryData.Category }).exec().then(data => {
-            themeSchema.find({ theme: caragoryData.Theme }).exec().then(themeData => {
+        categorySchema.findOne({ category: caragoryData['Category'] }).exec().then(data => {
+            themeSchema.find({ theme: caragoryData['Theme'] }).exec().then(themeData => {
                 if (themeData.length >= 1) {
                     resolve(themeData[0])
                 }
@@ -111,7 +131,8 @@ exports.fileUploadTheme = (caragoryData) => {
                     const theme = new themeSchema({
                         _id: new mongoose.Types.ObjectId(),
                         categoryID: data._id,
-                        theme: "Board & Committee functioning"
+                        theme: caragoryData['Theme'],
+                        themeCode:caragoryData['Theme Code']
                     }).save().then(categoryd => {
                         resolve(categoryd);
                     });
@@ -123,16 +144,18 @@ exports.fileUploadTheme = (caragoryData) => {
 
 exports.fileUploadKeyIssue = ( caragoryData) => {
     return new Promise(async (resolve, reject) => {
-       let data = await categorySchema.findOne({ category: caragoryData.Category }).exec()
+       let data = await themeSchema.findOne({ theme: caragoryData['Theme'] }).exec()
             let keyData = await keySchema.find({ keyIssues: caragoryData['Key Issues']}).exec()
-           if (keyData.length >= 1) {
+           if (keyData.length > 1) {
                     resolve(keyData[0])
                 }
                 else {
                     const key = new keySchema({
                         _id: new mongoose.Types.ObjectId(),
                         themeID: data._id,
-                        keyIssues: caragoryData['Key Issues']
+                        keyIssues: caragoryData['Key Issues'],
+                        keyIssuesCode:caragoryData['Key issues Code'],
+                        function:caragoryData['Function']
                     }).save().then(themed => {
                         resolve(themed);
                     });
@@ -140,71 +163,182 @@ exports.fileUploadKeyIssue = ( caragoryData) => {
                 });
 }
 
-async function file(caragoryData,dir,data){
-    var s = []
 
-    for (let i=0; i< dir.length ; i++ )
-    {
-        const dataSche = new dataSchema({
-            _id: new mongoose.Types.ObjectId(),
-            keyIssuesID: data._id,
-            DPCode: caragoryData['DP Code'],
-            description: caragoryData['Description'].toString(),
-            unit: caragoryData['Unit'],
-            fiscalYear: caragoryData['Fiscal Year'],
-            indicator: caragoryData['Indicator'],
-            response: caragoryData['Response'],
-            DPType:caragoryData['Data Type'],
-            fiscalYearEndDate:caragoryData['Fiscal Year End Date'],
-            percentile:caragoryData['Percentile'],     
-            directors: dir[i],
-
-        }).save()
-        s.push(dataSche)
-        
-    }
-    return s
+exports.fileUploadData = (caragoryData) => {
+    return new Promise(async (resolve, reject) => {
+        let keyData = await keySchema.find({ keyIssues: caragoryData['Key Issues']}).exec()
+        let data = await dpcodeSchema.find({DPCode: caragoryData['DP Code']}).exec()
+        if(data.length >=1){
+          resolve(data[0])
+        }
+        else{
+                const dataSche = new dpcodeSchema({
+              _id: new mongoose.Types.ObjectId(),
+              keyIssuesID:keyData._id,
+              DPCode: caragoryData['DP Code'],
+              dataCollection: caragoryData['Data Collection'],
+              DPName:caragoryData['DP Name'],
+              description: caragoryData['Description'],
+              unit: caragoryData['Unit'], 
+              polarity:caragoryData['Polarity'],       
+              signal: caragoryData['Signal'],
+              normalizedBy: caragoryData['Normalized by'],  
+              Weighted:caragoryData['Weighted'],
+              percentile:caragoryData['Percentile'],
+              relevantForIndia: caragoryData['Relevant for India'],
+              standaloneMatrix:caragoryData['Standalone/ Matrix'],
+              finalUnit:caragoryData['Final Unit'],
+              reference:caragoryData['Reference'],
+              industryRelevancy:caragoryData['Industry Relevancy']  
+              
+          }).save().then(datad => {
+            resolve(datad);
+        });
+}
+    });
 }
 
-exports.fileUploadMaster = (company,dir, caragoryData) => {
+exports.logic = (caragoryData)=>{
     return new Promise(async (resolve, reject) => {
-        console.log(".............",company)
-        let titleData = await titleSchema.findOne({ companyName: company[0]['Company Name'] }).exec()
-       let data = await keySchema.findOne({ keyIssues:caragoryData['Key Issues'] }).exec() 
-       let dpcode = await dataSchema.find({companyName: titleData._id, DPCode : caragoryData['DP Code']}).exec()
-             
-       if(dpcode.length > 2 ) {
-           resolve(dpcode[0])
-       }
-       else{
-
-        //   if(dir.length >1 ){
-        //     let key= await file(caragoryData,dir,data)
-       
-        //     resolve(key)
-        //   }
-        //   else{
-
-          const dataSche = new dataSchema({
+    let rule = await ruleSchema.find({DPCode:caragoryData['DP Code']}).exec()
+    if(rule.length >1  ){
+        resolve(rule[0])
+    }
+    else {
+        const data = new ruleSchema({
             _id: new mongoose.Types.ObjectId(),
-            companyName:titleData._id,
-            keyIssuesID: data._id,
-            DPCode: caragoryData['DP Code'],
-            description: caragoryData['Description'].toString(),
-            unit: caragoryData['Unit'],
-            fiscalYear: caragoryData['Fiscal Year'],
-            indicator: caragoryData['Indicator'],
-            response: caragoryData['Response'],
-            DPType:caragoryData['Data Type'],     
-            fiscalYearEndDate:caragoryData['Fiscal Year End Date'],
-            percentile:caragoryData['Percentile']  
-            
-        }).save().then(response=>{
-            resolve(response)
-        })
-    // } 
-       }   
+              ruleID:caragoryData['Rule ID'],
+              DPCode: caragoryData['DP Code'],
+              aidDPLogic: caragoryData['Aid DP/Logic'],
+              methodName:caragoryData['Method Name'],
+              methodType:caragoryData['Method Type'],
+              criteria:caragoryData['Criteria'],
+              parameter:caragoryData['Parameter']
+
+        }).save().then(datad => {
+            resolve(datad);
+        });
+    }
+    })
+}
+
+async function director( dir ,caragoryData){
+    var directors=[]
+    dir.forEach(element => {
+        directors.push(caragoryData[element])
+    });
+
+    return directors
+}
+
+
+exports.fileUploadMaster = (dir ,company ,caragoryData) => {
+    return new Promise(async (resolve, reject) => {
+       let data = await dataSchema.find({  companyName: company._id, DPCode : caragoryData['DP Code'] }).exec()
+            if (dir.length == 0){
+            if(data.length>1){
+                resolve(data[0])
+            }
+            else{
+                const dataSche = new dataSchema({
+                    _id: new mongoose.Types.ObjectId(),
+                    companyName:company._id,
+                    DPCode: caragoryData['DP Code'],
+                    DPType: caragoryData['Data Type'],
+                    description: caragoryData['Description'],
+                    unit: caragoryData['Unit'],
+                    fiscalYear: caragoryData['Fiscal Year'],
+                    indicator: caragoryData['Indicator'],
+                    fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                    response: caragoryData['Response'],
+                    sourceName: caragoryData['Source name'],
+                    sourceURL: caragoryData['URL'],
+                    sourcePublicationDate: caragoryData['Publication date'],
+                    pageNumber: caragoryData['Page number'],
+                    snapshot: caragoryData['Text snippet'],
+                    comments: caragoryData['Comments/Calculations'],
+                }).save().then(themed => {
+                    resolve(themed);
+                });
+            }
+        }
+        else{
+            if(data.length>1){
+                resolve(data[0])
+            }
+            else{
+            let directors =  await director(dir,caragoryData);
+
+            const dataSche = new dataSchema({
+                _id: new mongoose.Types.ObjectId(),
+                companyName:company._id,
+                DPCode: caragoryData['DP Code'],
+                DPType: caragoryData['Data Type'],
+                description: caragoryData['Description'],
+                unit: caragoryData['Unit'],
+                fiscalYear: caragoryData['Fiscal Year'],
+                indicator: caragoryData['Indicator'],
+                fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                response: caragoryData['Response'],
+                sourceName: caragoryData['Source name'],
+                sourceURL: caragoryData['URL'],
+                sourcePublicationDate: caragoryData['Publication date'],
+                pageNumber: caragoryData['Page number'],
+                snapshot: caragoryData['Text snippet'],
+                comments: caragoryData['Comments/Calculations'],
+                directors:directors
+            }).save().then(themed => {
+                resolve(themed);
+            });
+        }
+        }            
         
+    });
+}
+
+exports.fileUploadControversy = (company ,caragoryData) => {
+    return new Promise(async (resolve, reject) => {
+        controversySchema.find({  companyName: company._id, DPCode : caragoryData['DP Code'] }).exec().then(data => {
+            if(data.length>1){
+                resolve(data[0])
+            }
+            else{
+                const dataSche = new controversySchema({
+                    _id: new mongoose.Types.ObjectId(),
+                    companyName:company._id,
+                    DPCode: caragoryData['DP Code'],
+                    // DPType: caragoryData['Data Type'],
+                    // description: caragoryData['Description'],
+                    unit: caragoryData['Unit'],
+                    fiscalYear: caragoryData['Fiscal Year'],
+                    // indicator: caragoryData['Indicator'],
+                    // fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                    response: caragoryData['Response'],
+                    // sourceName: caragoryData['Source name'],
+                    sourceURL: caragoryData['URL'],
+                    sourcePublicationDate: caragoryData['Source Publication Date'],
+                //     pageNumber: caragoryData['Page number'],
+                //     snapshot: caragoryData['Text snippet'],
+                //     comments: caragoryData['Comments/Calculations'],
+                //     Screenshot:caragoryData['Screenshot (in png)'],
+                //     PDF:caragoryData['PDF'],
+                //     wordDOC:caragoryData['Word Doc (.docx)'],
+                //     excel:caragoryData['Excel (.xlxsx)'],
+                //     filePathWay:caragoryData['File pathway'],
+                //     dataVerification:caragoryData['Data Verification'],
+                //     errorType:caragoryData['Error Type'],
+                //     errorComments:caragoryData['Error Comments'],
+                //    internalFileSource:caragoryData['Internal file source'],
+                //    errorStatus:caragoryData['Error Status'],
+                //    analystComments:caragoryData['Analyst Comments'],
+                //    additionalComments:caragoryData['Additional comments']
+                    
+                }).save().then(themed => {
+                    resolve(themed);
+                });
+            }
+            
+        })
     });
 }
 
@@ -222,68 +356,16 @@ exports.getNewAllCategory = (companyData) => {
         })
     });
 }
+  
 
-exports.getAllCategory =(category)=>{
-    return new Promise(async (resolve, reject) => {
-        categorySchema.find({ category: category.categoryID }).exec().then(data => {
-            if (data.length >= 1) {
-                category.category = data;
-                resolve(category);
-            }
-            else {
-                reject;
-            }
-        })
-    });
-
-}
-
-exports.getAllDirectives = (companyData)=>{
-    return new Promise(async (resolve, reject) => {
-         directiveSchema.find({ companyID: companyData._id }).exec().then(data => {
-            if (data.length >= 1) {
-                companyData.directors = data;
-                resolve(companyData);
-            }
-            else {
-                reject;
-            }
-        })
-    });
-}
-
-async function dir(directiveName, titleData ){
-    
-        for(let i=0 ;i <directiveName.length ;i++){
-            
-    
-            const direct = new  directiveSchema({
-               _id: new mongoose.Types.ObjectId(),
-                companyID: titleData._id,
-               directors : directiveName[i]}).save();
-               
-         }
-         return 'success';  
-}
-
-exports.directive = (directiveName, company )=>{
-    return new Promise(async (resolve, reject) => {
-        
-     let titleData=  await titleSchema.findOne({ companyName: company.companyName }).exec()
-        let  direct = await  dir(directiveName, titleData);
-         resolve(direct)
-    
-})
-
-}
 async function f(keyName){
 
     var  dir =[]
     if(keyName.hasOwnProperty('Source name') && keyName.hasOwnProperty('Fiscal Year End Date') ){
        var c = Object.keys(keyName)
-    
        let s = c.indexOf('Source name')
        let e = c.indexOf('Fiscal Year End Date')
+
     
          for (let i = e+1 ; i < s-1 ;i++)
          {             
@@ -297,10 +379,11 @@ async function f(keyName){
     }
 exports.getDirectives = (keyName)=>{
     return new Promise(async (resolve, reject) => {
-     let dir= await  f(keyName);
-        
+     let dir= await  f(keyName);  
     resolve(dir)
 });
 }
+
+
 
 

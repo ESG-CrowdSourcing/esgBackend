@@ -5,16 +5,20 @@ var keySchema = new schema({
     _id: mongoose.Schema.Types.ObjectId,
     themeID: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category'
+        ref: 'Theme'
     },
     keyIssues:{
         type:String,
         required:false
     },
-    data:{
-        type:Array,
+    keyIssuesCode:{
+        type:String,
+        required:false
+    },
+    function:{
+        type:String,
         required:false
     }
 });
 
-module.exports = mongoose.model('Key', keySchema);
+module.exports = mongoose.model('KeyIssues', keySchema);

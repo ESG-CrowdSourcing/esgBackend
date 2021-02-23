@@ -60,12 +60,8 @@ var titleSchema = new schema({
 
         type: String,
         required:false
-    },
-    category: {
-        type: Array,
-        required: false
     }
-
+    
 });
 
 module.exports = mongoose.model('CompanyTitle', titleSchema);

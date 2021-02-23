@@ -1,19 +1,17 @@
 var mongoose = require('mongoose');
 var schema = mongoose.Schema;
-const shortId = require('shortid')
-
 
 var dataSchema = new schema({
     _id: mongoose.Schema.Types.ObjectId,
-    companyName:{
+    keyIssuesID:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'CompanyTitle'
+        ref: 'KeyIssues'
     },
     DPCode: {
         type: String,
         required: false
     },
-    DPType:{
+    dataCollection:{
         type: String,
         required: false
     },
@@ -29,53 +27,45 @@ var dataSchema = new schema({
         type: String,
         required: false
     },
-    fiscalYear: {
+    polarity: {
         type: String,
         required: false
     },
-    indicator: {
+    signal: {
         type: String,
         required: false
     },
-    response: {
-        type: String,
-        required: false
-    },
-    fiscalYearEnddate:{
+    
+    normalizedBy:{
         type:String,
         required:false
     },
-    directors:{
-        type:Array,
+    Weighted:{
+        type:String,
         required:false
     },
     percentile: {
         type: String,
         required: false
     },
-    sourceName:{type: String,
+    relevantForIndia:{type: String,
         required:false},
-    sourceURL:{
-        type: String,
-        required: false,
-        default: shortId.generate
-    },
-    sourcePublicationDate:{
+    finalUnit:{
         type: String,
         required:false
     },
-    pageNumber:{
+    standaloneMatrix:{
         type: String,
         required:false
     },
-    snapshot:{
+    reference:{
         type: String,
         required:false
     },
-    comments:{
+    industryRelevancy:{
         type: String,
         required:false
-    },
+    }
 });
 
-module.exports = mongoose.model('ClientData', dataSchema);
+module.exports = mongoose.model('DataDetails', dataSchema);

@@ -11,10 +11,10 @@ var themeSchema = new schema({
         type:String,
         required:false
     },
-    keys:{
-        type:Array,
+    themeCode:{
+        type:String,
         required:false
     }
 });
 
-module.exports = mongoose.model('theme', themeSchema);
+module.exports = mongoose.model('Theme', themeSchema);

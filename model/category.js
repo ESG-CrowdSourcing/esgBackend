@@ -3,14 +3,15 @@ var schema = mongoose.Schema;
 
 var categorySchema = new schema({
     _id: mongoose.Schema.Types.ObjectId,
-    category: {
+    categoryCode: {
         type: String,
         required: true
     },
-    companyID:{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'CompanyTitle'
-        },
+    category:{
+        type: String,
+        required: true
+    }
+    
  
 });
 

@@ -1,7 +1,4 @@
-const Excel = require('exceljs');
-// var mongoose = require('mongoose');
  var XLSX = require('xlsx')
-var Converter = require('csvtojson').Converter;
 
 exports.sheetOne = (url) => {
 
@@ -12,7 +9,7 @@ exports.sheetOne = (url) => {
         var resultArr= [], companyArr=[]
         for(let i=0 ; i< sheet_name_list.length;i++){
 
-            var res= XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[i]]);
+            var res= XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[i]],{defval:" "});
             if(i == 0){
                 companyArr.push(res)
             }
@@ -26,4 +23,16 @@ exports.sheetOne = (url) => {
         })
 
 
+}
+
+exports.masterSheets = (url)=>{
+    return new Promise(async (resolve, reject) => {
+        
+        var workbook = XLSX.readFile(url);
+        var sheet_name_list = workbook.SheetNames;
+            var res= XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]],{defval:" "});   
+        
+        resolve(res);
+               
+        })
 }
