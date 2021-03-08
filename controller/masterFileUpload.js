@@ -148,10 +148,7 @@ exports.getAllCompany = async function (req, res) {
                     message: 'company not found ', status: 400
                 })
             }
-
         })
-
-
     } catch (error) {
         console.log('error=====>', error);
         return error;
@@ -159,16 +156,13 @@ exports.getAllCompany = async function (req, res) {
     }
 }
 
+
 // Fetch new company data
 exports.getNewData = async function (req, res) {
     try {
         let companyData = await titleSchema.find({ companyName: req.params.companyName })
-        let result = [], keyVal = [], categoryVal = [], keyName = {}, CategoryName = {};
-        //let catagotyData = await category.getNewAllCategory(companyData[0]);
-
-        // for (let i = 0; i < catagotyData.category.length; i++) {
-        //     let keysData = await keyController.getAllKey(catagotyData.category[i]);
-        //     for (let k = 0; k < keysData.keys.length; k++) {
+        let result = []
+    
                 let dataVal = await dataController.getAllData(companyData[0]._id);
                 result.push(dataVal);
                 return res.status(200).json({
@@ -180,34 +174,7 @@ exports.getNewData = async function (req, res) {
                         fiscalYear: result
                     }
                 })
-        //     }
-
-        // }
-        // var mer1 = [];
-        // result.forEach(element => {
-        //     Array.prototype.push.apply(mer1, element);
-        // })
-        // var mer2 = [];
-        // mer1.forEach(element => {
-        //     Array.prototype.push.apply(mer2, element);
-        // })
-
-        // var group = _.groupBy(mer2, 'Year')
-        // var fisYear = []
-
-
-        // if (Object.keys(group).length > 0) {
-        //     Object.keys(group).forEach(function (key) {
-
-
-        //         fisYear.push({ 'Year': key, 'data': group[key] })
-        //     });
-        //     fisYear = _.orderBy(fisYear, 'Year')
-        // }
-
-
-
-       
+              
     } catch (error) {
         console.log('error=====>', error);
         return error;

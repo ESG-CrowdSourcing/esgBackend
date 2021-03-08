@@ -1,7 +1,6 @@
 var dataSchema = require('../model/data')
 var mongoose = require('mongoose')
-var directorSchema = require('../model/dir');
-var titleSchema = require('../model/companyTitle')
+var matrix = require('../model/dpCode')
 
 exports.getDirectors =(director)=>{
     return new Promise(async (resolve, reject) => {
@@ -12,25 +11,26 @@ exports.getDirectors =(director)=>{
     })
 }
 
-async function file(fiscal){
+async function file(fiscal , matrix){
     var dataValues =[], datapoints={};
     for( let fi =0 ;fi< fiscal.length ;fi++){
-        datapoints={
-            Year:fiscal[fi].fiscalYear,
-            DPCode : fiscal[fi].DPCode,
-            Response:fiscal[fi].response,
-            ResponseUnit:fiscal[fi].DPType,
-            DPName:fiscal[fi].DPName,
-            PerformanceUnit:fiscal[fi].unit,
-            Percentile:fiscal[fi].percentile
-        }
-        dataValues.push(datapoints);
+        if(matrix.includes(fiscal[fi].DPCode)){
 
+        }
+        else{
+            datapoints={
+                Year:fiscal[fi].fiscalYear,
+                DPCode : fiscal[fi].DPCode,
+                Response:fiscal[fi].response,
+                PerformanceResponse:fiscal[fi].performance,
+            }
+            dataValues.push(datapoints);
+        }
     }
-    return dataValues
+    return dataValues;
 }
 exports.getAllData = (company) => {
-    var dataValues =[], datapoints={}, yearValues=[], yearData={};
+    var  yearValues=[], yearData={};
     return new Promise(async (resolve, reject) => {
         // let data=await dataSchema.find({keyIssuesID:keyIssues._id}).exec()
             let year =await dataSchema.find({companyName: company}).distinct('fiscalYear')
@@ -39,8 +39,10 @@ exports.getAllData = (company) => {
                     
                 }
                 else{
+                    let matrixValue = await matrix.find({standaloneMatrix:'Matrix'}).distinct('DPCode').exec();
+
                     let fiscal = await dataSchema.find({companyName: company,fiscalYear: year[yr]}).exec()
-                    let f = await file(fiscal);
+                    let f = await file(fiscal , matrixValue);
                     yearData={ year: year[yr],
                                Data: f}
                    yearValues.push(yearData)

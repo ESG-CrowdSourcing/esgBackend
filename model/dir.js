@@ -8,8 +8,12 @@ var dirSchema = new schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'CompanyTitle'
         },
-        directors:{
+        fiscalYear:{
             type:String,
+            required:false
+        },
+        companyDirectors:{
+            type:Array,
             required:false
         }
 });

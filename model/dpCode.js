@@ -1,5 +1,7 @@
 var mongoose = require('mongoose');
 var schema = mongoose.Schema;
+mongoose.Schema.Types.Boolean.convertToFalse.add('');
+mongoose.Schema.Types.Boolean.convertToTrue.add('TRUE')
 
 var dataSchema = new schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -28,6 +30,10 @@ var dataSchema = new schema({
         required: false
     },
     polarity: {
+        type: String,
+        required: false
+    },
+    polarityCheck: {
         type: String,
         required: false
     },
@@ -68,4 +74,4 @@ var dataSchema = new schema({
     }
 });
 
-module.exports = mongoose.model('DataDetails', dataSchema);
+module.exports = mongoose.model('DPDetails', dataSchema);

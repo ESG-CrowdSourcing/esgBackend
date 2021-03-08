@@ -29,6 +29,10 @@ var dataSchema = new schema({
         type: String,
         required: false
     },
+    performance: {
+        type: String,
+        required: false
+    },
     fiscalYear: {
         type: String,
         required: false
@@ -76,6 +80,8 @@ var dataSchema = new schema({
         type: String,
         required:false
     },
+
+    
 });
 
 module.exports = mongoose.model('ClientData', dataSchema);

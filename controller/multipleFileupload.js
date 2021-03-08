@@ -8,6 +8,9 @@ exports.sheetOne = (url) => {
         var sheet_name_list = workbook.SheetNames;
         var resultArr= [], companyArr=[]
         for(let i=0 ; i< sheet_name_list.length;i++){
+            
+            var s=workbook.Sheets[sheet_name_list[i]]
+            s['!rows']
 
             var res= XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[i]],{defval:" "});
             if(i == 0){
