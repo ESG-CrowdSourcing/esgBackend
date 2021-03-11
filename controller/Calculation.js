@@ -90,7 +90,76 @@ async function percent(Num, Den) {
     })
 }
 
-async function sum(dp, arr) {
+async function add(Num1, Num2){
+    return new Promise(async (resolve, reject) => {
+    try{
+        if(Num1 == 'NA' || Num2 == 'NA'){
+            resolve('NA')
+        }
+        else{
+            var value = Num1+Num2
+            resolve(value)
+        }
+    }catch(err){
+        reject(err)
+    }
+
+    })
+}
+
+async function multiply(Num,Den) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (Num === " " || Den == 0 || Den == 'NA') {
+                value = 'NA'
+                resolve(value)
+            }
+            else if (Num == 0) {
+                value = 0
+                resolve(value)
+            }
+            else {
+                var num = Number(Num), den = Number(Den)
+                var value = (num / den) * 2000 * 1000000
+                resolve(value)
+            }
+        } catch (error) {
+            reject(error)
+
+        }
+
+    })
+}
+async function sumCount(arr){
+    return new Promise(async (resolve, reject) => {
+        let arrValue =[]
+        try {
+            if (!Array.isArray(arr)) {
+                resolve('NA')
+            }
+            else {
+                let a = arr.filter(e => String(e).trim());
+                let Arr = a.map(i => Number(i));
+                if (Arr.length > 0) {
+                    var value = Arr.reduce((a, x) => a + x)
+                    arrValue.push(value)
+                    var length = Arr.length
+                    arrValue.push(length)
+                    resolve(arrValue)
+                }
+                else {
+                    resolve('NA')
+                }
+            }
+        } catch (error) {
+            reject(error)
+
+        }
+
+    })
+}
+
+async function sum(arr) {
     return new Promise(async (resolve, reject) => {
         try {
             if (!Array.isArray(arr)) {
@@ -100,7 +169,6 @@ async function sum(dp, arr) {
                 let a = arr.filter(e => String(e).trim());
                 let Arr = a.map(i => Number(i));
                 if (Arr.length > 0) {
-
                     var value = Arr.reduce((a, x) => a + x)
                     resolve(value)
                 }
@@ -117,6 +185,24 @@ async function sum(dp, arr) {
 
 }
 
+async function compositeCount(arr1, arr2, criteria) {
+    return new Promise(async (resolve, reject) => {
+        let count = 0;
+        try {
+            for (let i = 0; i < arr1.length; i++) {
+
+                if (arr1[i] == criteria && arr2[i] == criteria) {
+                    count++
+                }
+
+            }
+            resolve(count)
+
+
+        } catch (error) { reject(error) }
+    })
+}
+
 async function count(arr, criteria) {
     return new Promise(async (resolve, reject) => {
         let Arr = arr.filter(e => String(e).trim());
@@ -129,6 +215,15 @@ async function count(arr, criteria) {
                 if (criteria == '0.02') {
                     if (Arr.length > 0) {
                         var value = Arr.filter(item => item >= criteria).length;
+                        resolve(value)
+                    }
+                    else {
+                        resolve('NA')
+                    }
+                }
+                else if (criteria == 'D') {
+                    if (Arr.length > 0) {
+                        var value = Arr.length;
                         resolve(value)
                     }
                     else {
@@ -175,7 +270,7 @@ async function sumMethod(company, year, value, dpcode) {
         if (arr.length === 0) {
             sumValue = 0;
         } else {
-            sumValue = await sum(value, arr[0].directors)
+            sumValue = await sum(arr[0].directors)
         }
         let update = { $set: { response: sumValue } }
         await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: dpcode }, update).exec();
@@ -228,28 +323,45 @@ async function Countof(ruleValue, company, year, numparams, value) {
         if (ruleValue[0].methodType == 'composite') {
             let total = 0;
             let params = ruleValue[0].parameter.split(',')
-            for (let p = 0; p < params.length; p++) {
-                let arr = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[p] }).exec();
-                let respon = await count(arr[0].directors, ruleValue[0].criteria)
+            if (params.length == 2) {
+                let arr1 = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[0] }).exec();
+                let arr2 = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[1] }).exec();
 
+                let response = await compositeCount(arr1[0].directors, arr2[0].directors, ruleValue[0].criteria)
 
-                if (respon == 'NA') {
-                    total += 0
-                } else {
-                    total += respon
-                }
+                // console.log("DPCoDE : ", value, " year : ", year, " response : ", response)
+
+                let update = { $set: { response: response } }
+                await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+
+                resolve('updated')
+
             }
+            else {
+                for (let p = 0; p < params.length; p++) {
+                    let arr = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[p] }).exec();
+                    let respon = await count(arr[0].directors, ruleValue[0].criteria)
 
-            let update = { $set: { response: total } }
-            await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+                    if (respon == 'NA') {
+                        total += 0
+                    } else {
+                        total += respon
+                    }
+                }
+
+                let update = { $set: { response: total } }
+                await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+                resolve('updated')
+            }
         }
         else {
             let arr = await clientData.find({ companyName: company, fiscalYear: year, DPCode: numparams }).exec();
             let countValue = await count(arr[0].directors, ruleValue[0].criteria)
             let update = { $set: { response: countValue } }
             await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+            resolve('updated')
         }
-        resolve('updated')
+
     })
 }
 
@@ -264,6 +376,19 @@ async function Minus(ruleValue, company, year, value) {
         let update = { $set: { response: response } }
 
         await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+        resolve('updated')
+    })
+}
+
+
+async function ifcondition(checkDen, company, year) {
+    return new Promise(async (resolve, reject) => {
+        if (checkDen.length > 0) {
+            if (checkDen[0].methodName == 'count of') {
+                let numparams = checkDen[0].parameter.split(',')
+                await Countof(checkDen, company, year, numparams[0], checkDen[0].DPCode);
+            }
+        }
         resolve('updated')
     })
 }
@@ -287,6 +412,7 @@ exports.calc = function (req, res) {
                         let ruleValue = await rule.find({ DPCode: value }).exec()
 
                         if (ruleValue[0].methodName == 'Ratio') {
+                           // console.log("................ ", ruleValue[0].methodType == 'IF')
 
                             let param = ruleValue[0].parameter.split(',')
                             let checknum = await rule.find({ DPCode: param[0] }).exec();
@@ -321,62 +447,63 @@ exports.calc = function (req, res) {
 
                                     let update = { $set: { response: response } }
                                     await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: checkDen[0].DPCode }, update).exec();
-
                                 }
 
                             }
-                            if (ruleValue[0].methodType == 'sum') {
-                                setTimeout(async () => {
+                            if (ruleValue[0].methodType == 'IF') {
+                               
+                                    await ifcondition(checkDen, company[0]._id, year[y])
+                                    let numerator = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[0] }).exec();
+                                  
+                                    let numer = await sumCount(numerator[0].directors)
+                                    let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[1] }).distinct('response').exec();
+                                    let percentValue = 0.5 * Number(Den[0])
+                                    if(isNaN(numer[1]) || Den[0] === " " ){
+                                        let update = { $set: { response: 'NA' } }
+                                        await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
 
-                                    let params = ruleValue[0].parameter.split(',')
+                                    }
+                                   else if (Number(numer[1]) < Number(percentValue)) {
 
-                                    let arr = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[0] }).exec();
-                                    let numer
-                                    if (arr.length === 0) {
-                                        numer = 0;
+                                        let update = { $set: { response: 'NA' } }
+                                        await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
+
                                     } else {
-                                        numer = await sum(params[0], arr[0].directors)
+
+                                        let response = await ratio(numer[0], numer[1])
+                                        let update = { $set: { response: response } }
+                                        await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
                                     }
-                                    let checkDen = await rule.find({ DPCode: params[1] }).exec();
-                                    if (checkDen.length > 0) {
-                                        if (checkDen[0].methodName == 'count of') {
-                                            let numparams = checkDen[0].parameter.split(',')
-                                            await Countof(checkDen, company[0]._id, year[y], numparams[0], params[1]);
-                                        }
-                                    }
-                                    let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[1] }).distinct('response').exec();
-                                    let response = await ratio(numer, Den[0])
-
-                                    let update = { $set: { response: response } }
-                                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
-                                }, 1000)
-                            }
-                            else if (ruleValue[0].methodType == 'sum,count') {
-                                setTimeout(async () => {
-
-
-                                    let params = ruleValue[0].parameter.split(',')
-
-                                    let arr = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[0] }).exec();
-                                    let numer = await sum(params[0], arr[0].directors)
-
-
-                                    let arr1 = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[1] }).exec();
-                                    let deno = await count(arr1[0].directors, ruleValue[0].criteria)
-                                    let respons = await ratio(numer, deno)
-                                    const upda = { $set: { response: respons } }
-                                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, upda).exec();
-
-                                }, 1000)
 
                             }
+                            // else if (ruleValue[0].methodType == 'sum,count') {
+                            //     setTimeout(async () => {
 
-                            let num = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[0] }).distinct('response').exec();
-                            let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[1] }).distinct('response').exec();
-                            let response = await ratio(num[0], Den[0])
 
-                            const updat = { $set: { response: response } }
-                            await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, updat).exec();
+                            //         let params = ruleValue[0].parameter.split(',')
+
+                            //         let arr = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[0] }).exec();
+                            //         let numer = await sum(params[0], arr[0].directors)
+
+
+                            //         let arr1 = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[1] }).exec();
+                            //         let deno = await count(arr1[0].directors, ruleValue[0].criteria)
+                            //         let respons = await ratio(numer, deno)
+                            //         const upda = { $set: { response: respons } }
+                            //         await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, upda).exec();
+
+                            //     }, 1000)
+
+                            // }
+                            else{
+
+                                let num = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[0] }).distinct('response').exec();
+                                let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[1] }).distinct('response').exec();
+                                let response = await ratio(num[0], Den[0])
+    
+                                const updat = { $set: { response: response } }
+                                await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, updat).exec();
+                            }
 
                         }
                         else if (ruleValue[0].methodName == 'Sum' || ruleValue[0].methodName == 'sum') {
@@ -388,9 +515,9 @@ exports.calc = function (req, res) {
                                 let params = ruleValue[0].parameter.split(',')
                                 let arr = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[0] }).exec();
 
-                                let numer = await sum(params[0], arr[0].directors)
+                                let numer = await sum( arr[0].directors)
                                 let arr1 = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[1] }).exec();
-                                let deno = await sum(params[1], arr1[0].directors)
+                                let deno = await sum(arr1[0].directors)
                                 let respon = await percent(numer, deno)
                                 let update = { $set: { response: respon } }
                                 await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();

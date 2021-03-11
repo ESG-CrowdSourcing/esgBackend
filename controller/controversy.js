@@ -25,7 +25,6 @@ exports.controversy = async function (req, res) {
             status: 403,
         });
     }
-
 }
 
 async function file(fiscals){
