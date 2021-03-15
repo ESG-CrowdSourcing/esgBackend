@@ -32,6 +32,6 @@ module.exports = function (app) {
     // app.route('/getDirectiveData/:companyName').post(masterFileUpload.getNewDataDir);
 
     app.route('/percentile/:NIC').post( percentile.percentile)
-    app.route('/percentile').post(xslx.single('file'),cmpany.Ztable);
+    app.route('/Ztabe').post(xslx.single('file'),cmpany.Ztable);
     app.route('/polarityCheck').post(xslx.single('file'),cmpany.polarityCheck)
 }                   
