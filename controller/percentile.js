@@ -84,10 +84,6 @@ async function negative(dp, companyData, y, values, response, stdDev) {
             // var avg = 6482.348364
 
             let negativeValue = (avg - response) / stdDev
-            // if (companyData == '60435d460e4b652b0c71b71f' && dp == 'ANTR001' ){
-            //     console.log('RELiance ' , dp , y ,"  negative    " , " AVErage    " , avg , "  Std devation" ,stdDev)
-
-            // }
             resolve(negativeValue)
         }
     })
@@ -111,18 +107,19 @@ exports.percentile = function (req, res) {
             let companyName = await company.find({ NIC_Code: NIC }).distinct('_id').exec()
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
             let dpCodes = await data.find({ percentile: 'Yes' }).distinct('DPCode').exec()
+
             await resValue(NIC)
             year.forEach(async (y) => {
                 dpCodes.forEach(async (dp) => {
+
                     let dpValues = await companyDetails(dp, y, companyName)
 
                     companyName.forEach(async (companyData) => {
+
+
                         let polarityCheck = await data.find({ DPCode: dp, percentile: 'Yes' }).distinct('polarity').exec()
                         let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
-                        // if (companyData == '60435d460e4b652b0c71b71f' && dp == 'EQUR014' ){
-                        //     console.log('RELiance ' , dp ,"      ", y , "  DP VALUES ::: " , dpValues )
 
-                        // }
                         let std = await standardDeviation(dpValues);
                         if (response[0] === 'NA' || response[0] === " ") {
                             let responseValue = { $set: { performance: 'NA' } }
@@ -138,12 +135,6 @@ exports.percentile = function (req, res) {
                             else if (polarityCheck[0] === 'Negative') {
 
                                 let value = await negative(dp, companyData, y, dpValues, Number(response[0]), std)
-
-                                if (dp == 'BOCR012') {
-
-                                    console.log('///////pppppppppppp ', companyData, dp, "   ", dpValues, "   ", y, "     ", std, " ")
-
-                                }
                                 await percentileCalc(value, dp, companyData, y)
                             }
                         }
@@ -204,15 +195,6 @@ function percentileCalc(value, dp, companyData, y) {
                 let responseValue = { $set: { performance: percentile } }
                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
             }
-
-            if (dp == 'BOCR012') {
-                console.log('//////////////////////////////////////// ', companyData, dp, "      ", y, "     ", value, " ", percentile)
-
-            }
-            // if (companyData == '60435c540e4b652b0c71ac61' || dp == 'COSR009') {
-            //     console.log('INDIAN OIL ', dp, "      ", y, "     ", value, " ", percentile)
-
-            // }
         }
     })
 }
@@ -259,11 +241,6 @@ function polarityChec(dp, companyData, y) {
                 }
                 else {
 
-                    // if( companyData == '60435d460e4b652b0c71b71f') {
-
-                    //     console.log("DPCODE :"+ dp ,"YEAR : ", y,  " REsponse : " + response[0] , " value  : " +polarityChe[0].value , response[0] >= polarityChe[0].value , Number(response[0]) >= Number(polarityChe[0].value))
-                    // }
-
                     if (polarityChe.length >= 1) {
                         if (Number(response[0]) >= Number(polarityChe[0].value)) {
 
@@ -274,8 +251,6 @@ function polarityChec(dp, companyData, y) {
                             else if (polarityChe[0].condition == 'greaterthan' || polarityChe[0].condition == 'lesser') {
 
                                 await negativecheck(dp, companyData, y)
-
-
                             }
                         }
                         else if (Number(response[0]) <= Number(polarityChe[0].value)) {
@@ -296,7 +271,7 @@ function polarityChec(dp, companyData, y) {
 
                                 let param = polarityChe[0].value.split(',');
 
-                                if (Number(response[0]) > Number(param[0]) && Number(response[0]) < Number(param[1])) {
+                                if (Number(response[0]) >= Number(param[0]) && Number(response[0]) <= Number(param[1])) {
                                     await positivecheck(dp, companyData, y)
 
                                 } else {
@@ -304,16 +279,16 @@ function polarityChec(dp, companyData, y) {
                                 }
 
                             }
-                            else if (polarityChe[0].condition == 'rangeCheck') {
-                                let params = polarityChe[0].value.split(',')
+                            // else if (polarityChe[0].condition == 'rangeCheck') {
+                            //     let params = polarityChe[0].value.split(',')
 
-                                if (Number(response[0]) < Number(params[0]) || Number(response[0]) > Number(params[1])) {
-                                    await negativecheck(dp, companyData, y)
+                            //     if (Number(response[0]) < Number(params[0]) || Number(response[0]) > Number(params[1])) {
+                            //         await negativecheck(dp, companyData, y)
 
-                                } else {
-                                    await positivecheck(dp, companyData, y)
-                                }
-                            }
+                            //     } else {
+                            //         await positivecheck(dp, companyData, y)
+                            //     }
+                            // }
                         }
                     }
                 }
@@ -325,6 +300,33 @@ function polarityChec(dp, companyData, y) {
         }
     })
 
+}
+function compareValues(arr1, arr2) {
+    return new Promise(async (resolve, reject) => {
+
+        var res = arr1.filter(function (n) { return !this.has(n) }, new Set(arr2));
+
+        resolve(res);
+
+
+    })
+
+}
+
+function missedDP(companyData ,y , checkdp){
+    return new Promise(async (resolve, reject) => {
+
+    checkdp.forEach(async (clientDP) => {
+
+        let respon = await clientData.find({ companyName: companyData, fiscalYear: y, DPCode: clientDP }).distinct('response').exec()
+        if (respon[0] == 'NA' || respon[0] === " ") {
+            let responseValue = { $set: { performance: 'NA', response: 'NA' } }
+            await clientData.updateOne({ DPCode: clientDP, companyName: companyData, fiscalYear: y }, responseValue).exec()
+        }
+    
+    })
+    resolve('updated')
+})
 }
 function resValue(NIC) {
     return new Promise(async (resolve, reject) => {
@@ -338,6 +340,10 @@ function resValue(NIC) {
                     let polarityChecks = await data.find({ DPCode: dp }).distinct('polarityCheck').exec()
                     let numberCheck = await data.findOne({ DPCode: dp }).exec()
                     companyName.forEach(async (companyData) => {
+                        let clientdp = await clientData.find({ companyName: companyData, fiscalYear: y }).distinct('DPCode').exec()
+
+                        let checkdp = await compareValues(clientdp, dpCodes)
+                         await missedDP(companyData, y, checkdp);
 
                         if (polarityChecks[0] == "true") {
 
