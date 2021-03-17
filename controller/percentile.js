@@ -196,6 +196,7 @@ function percentileCalc(value, dp, companyData, y) {
                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
             }
         }
+        resolve('updated')
     })
 }
 
@@ -279,16 +280,7 @@ function polarityChec(dp, companyData, y) {
                                 }
 
                             }
-                            // else if (polarityChe[0].condition == 'rangeCheck') {
-                            //     let params = polarityChe[0].value.split(',')
-
-                            //     if (Number(response[0]) < Number(params[0]) || Number(response[0]) > Number(params[1])) {
-                            //         await negativecheck(dp, companyData, y)
-
-                            //     } else {
-                            //         await positivecheck(dp, companyData, y)
-                            //     }
-                            // }
+                           
                         }
                     }
                 }
