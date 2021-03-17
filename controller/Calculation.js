@@ -624,6 +624,23 @@ exports.calc = function (req, res) {
                             }
 
                         }
+                        else if (ruleValue[0].methodName == 'As') {
+                            let res = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: ruleValue[0].DPCode }).exec();
+                            if (res[0].response === " ") {
+                                let numparams = ruleValue[0].parameter.split(',')
+
+                                let value = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: numparams[0] }).distinct('response').exec();
+
+                                const updat = { $set: { response: value[0] } }
+                                await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, updat).exec();
+
+                            } else {
+                                const updat = { $set: { response: res[0].response } }
+                                await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, updat).exec();
+
+                            }
+
+                        }
 
                     })
                 }
