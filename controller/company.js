@@ -12,17 +12,20 @@ exports.companyDetails = async function (req, res) {
         for (let f = 0; f < req.files.length; f++) {
             let standardData = await multipleFileuploadController.sheetOne(req.files[f].path);
             let company = await category.companyTitle(standardData.companyArr[0]);
-            companyName = company._id
-
-            for (let i = 0; i < standardData.resultArr.length - 1; i++) {
+            for (let i = 0; i < standardData.resultArr.length ; i++) {
                 for (let j = 0; j < standardData.resultArr[i].length; j++) {
-                    let dir = await category.getDirectives(standardData.resultArr[i][j])
-                    let c = await category.fileUploadMaster(dir, company, standardData.resultArr[i][j]);
+                    console.log("           ",  "           ", standardData.resultArr[i][j].Category == undefined)
+                    if(standardData.resultArr[i][j].Category == undefined){
+
+                    }else{
+                        let dir = await category.getDirectives(standardData.resultArr[i][j])
+                        let c = await category.fileUploadMaster(dir, company, standardData.resultArr[i][j]);
+                    }                    
                 }
             }
         }
         // let missedDP = await compare(companyName);
-// setTimeout(async ()=> {
+        // setTimeout(async ()=> {
 
 
         return res.status(200).json({
@@ -30,7 +33,7 @@ exports.companyDetails = async function (req, res) {
             // missedDPCodes: missedDP,
             status: 200,
         });
-    // },1800)
+        // },1800)
 
     } catch (error) {
         return res.status(402).json({
@@ -50,28 +53,28 @@ function compare(companyName) {
         let year = await clientData.find({ companyName: companyName }).distinct('fiscalYear').exec()
 
         year.forEach(async (y) => {
-            if( y == 'Fiscal Year'){
+            if (y == 'Fiscal Year') {
                 resolve(yearData)
             }
-            else{
-            let clientdp = await clientData.find({ companyName: companyName, fiscalYear: y }).distinct('DPCode').exec()
-            // console.log( " // " , y)
-            let missedExcel = await compareExcel(clientdp, dpCodes)
-            let missedTaxonomy = await compareTaxonomy(dpCodes, clientdp)
-            yearValue = {
-                Year: y,
-                countMissedDPInExcel: missedExcel.length,
-                countMissedDPInTaxonomy: missedTaxonomy.length
+            else {
+                let clientdp = await clientData.find({ companyName: companyName, fiscalYear: y }).distinct('DPCode').exec()
+                // console.log( " // " , y)
+                let missedExcel = await compareExcel(clientdp, dpCodes)
+                let missedTaxonomy = await compareTaxonomy(dpCodes, clientdp)
+                yearValue = {
+                    Year: y,
+                    countMissedDPInExcel: missedExcel.length,
+                    countMissedDPInTaxonomy: missedTaxonomy.length
+                }
+                yearData.push(yearValue)
             }
-            yearData.push(yearValue)
-        }
 
         })
-    
+
 
         // console.log(" .... ", yearData)
         resolve(yearData)
-    
+
     })
 }
 
@@ -90,7 +93,7 @@ async function compareTaxonomy(arr1, arr2) {
 async function compareExcel(arr1, arr2) {
     return new Promise(async (resolve, reject) => {
 
-        var res = arr2.filter( x=> !arr1.includes(x));
+        var res = arr2.filter(x => !arr1.includes(x));
         // console.log('///////////.............' , res.length)
 
         resolve(res);
