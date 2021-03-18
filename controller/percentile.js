@@ -323,7 +323,6 @@ async function resValue(NIC) {
             let companyName = await company.find({ NIC_Code: NIC }).distinct('_id').exec()
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
             let dpCodes = await data.find({}).distinct('DPCode').exec()
-            console.log("/////////////////" , NIC ,companyName , year)
 
             year.forEach(async (y) => {
                 dpCodes.forEach(async (dp) => {
@@ -339,7 +338,6 @@ async function resValue(NIC) {
                         if (polarityChecks[0] == "true") {
 
                             await polarityChec(dp, companyData, y)
-                            console.log("/////////////////", dp , y , companyData)
                         }
                         else {
                             let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
