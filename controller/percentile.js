@@ -62,11 +62,6 @@ async function positive(dp, companyData, y, values, response, stdDev) {
 
             var avg = await average(dp, companyData, y, values);
             let positiveValue = (response - avg) / stdDev;
-            // if (companyData == '60435d460e4b652b0c71b71f' && dp == 'ANTR001' ){
-            //     console.log('RELiance ' , dp ,"  ", y,"  positive " , " AVErage    " , avg , "  Std devation" ,stdDev)
-
-            // }
-
             resolve(positiveValue)
         }
 
@@ -81,8 +76,6 @@ async function negative(dp, companyData, y, values, response, stdDev) {
         } else {
 
             var avg = await average(dp, companyData, y, values);
-            // var avg = 6482.348364
-
             let negativeValue = (avg - response) / stdDev
             resolve(negativeValue)
         }
@@ -104,11 +97,12 @@ exports.percentile = function (req, res) {
         try {
             var NIC = req.params.NIC
 
-            let companyName = await company.find({ NIC_Code: NIC }).distinct('_id').exec()
+            let Nic_code = await company.find({ companyName: NIC }).distinct('NIC_Code').exec()
+            let companyName = await company.find({ NIC_Code: Nic_code[0] }).distinct('_id').exec()
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
             let dpCodes = await data.find({ percentile: 'Yes' }).distinct('DPCode').exec()
 
-            await resValue(NIC)
+            await resValue(Nic_code[0])
             year.forEach(async (y) => {
                 dpCodes.forEach(async (dp) => {
 
@@ -133,7 +127,6 @@ exports.percentile = function (req, res) {
                                 await percentileCalc(value, dp, companyData, y)
                             }
                             else if (polarityCheck[0] === 'Negative') {
-
                                 let value = await negative(dp, companyData, y, dpValues, Number(response[0]), std)
                                 await percentileCalc(value, dp, companyData, y)
                             }
@@ -143,11 +136,13 @@ exports.percentile = function (req, res) {
                 });
             })
 
-            setTimeout(() => {
+             setTimeout(async () => {
+
                 return res.status(200).json({
                     message: "percentile calculated",
                 })
-            }, 81500)
+            }, 199900)
+
 
         } catch (error) {
             return res.status(405).json({
@@ -162,6 +157,7 @@ function percentileCalc(value, dp, companyData, y) {
 
         let percentile;
         if (y == "Fiscal Year") {
+            resolve('updated')
 
         }
         else {
@@ -195,8 +191,9 @@ function percentileCalc(value, dp, companyData, y) {
                 let responseValue = { $set: { performance: percentile } }
                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
             }
+            resolve('updated')
         }
-        resolve('updated')
+
     })
 }
 
@@ -233,7 +230,6 @@ function polarityChec(dp, companyData, y) {
 
             let polarityChe = await polaritySchema.find({ DPCode: dp }).exec()
             if (y == 'Fiscal Year') {
-
             }
             else {
                 if (response[0] == 'NA' || response[0] === " ") {
@@ -280,9 +276,10 @@ function polarityChec(dp, companyData, y) {
                                 }
 
                             }
-                           
+
                         }
                     }
+                    
                 }
 
             }
@@ -293,7 +290,7 @@ function polarityChec(dp, companyData, y) {
     })
 
 }
-function compareValues(arr1, arr2) {
+async function compareValues(arr1, arr2) {
     return new Promise(async (resolve, reject) => {
 
         var res = arr1.filter(function (n) { return !this.has(n) }, new Set(arr2));
@@ -305,27 +302,29 @@ function compareValues(arr1, arr2) {
 
 }
 
-function missedDP(companyData ,y , checkdp){
+async function missedDP(companyData, y, checkdp) {
     return new Promise(async (resolve, reject) => {
 
-    checkdp.forEach(async (clientDP) => {
+        checkdp.forEach(async (clientDP) => {
 
-        let respon = await clientData.find({ companyName: companyData, fiscalYear: y, DPCode: clientDP }).distinct('response').exec()
-        if (respon[0] == 'NA' || respon[0] === " ") {
-            let responseValue = { $set: { performance: 'NA', response: 'NA' } }
-            await clientData.updateOne({ DPCode: clientDP, companyName: companyData, fiscalYear: y }, responseValue).exec()
-        }
-    
+            let respon = await clientData.find({ companyName: companyData, fiscalYear: y, DPCode: clientDP }).distinct('response').exec()
+            if (respon[0] == 'NA' || respon[0] === " ") {
+                let responseValue = { $set: { performance: 'NA', response: 'NA' } }
+                await clientData.updateOne({ DPCode: clientDP, companyName: companyData, fiscalYear: y }, responseValue).exec()
+            }
+
+        })
+        resolve('updated')
     })
-    resolve('updated')
-})
 }
-function resValue(NIC) {
+async function resValue(NIC) {
     return new Promise(async (resolve, reject) => {
         try {
             let companyName = await company.find({ NIC_Code: NIC }).distinct('_id').exec()
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
             let dpCodes = await data.find({}).distinct('DPCode').exec()
+            console.log("/////////////////" , NIC ,companyName , year)
+
             year.forEach(async (y) => {
                 dpCodes.forEach(async (dp) => {
                     let polarityCheck = await data.find({ DPCode: dp }).distinct('polarity').exec()
@@ -335,12 +334,12 @@ function resValue(NIC) {
                         let clientdp = await clientData.find({ companyName: companyData, fiscalYear: y }).distinct('DPCode').exec()
 
                         let checkdp = await compareValues(clientdp, dpCodes)
-                         await missedDP(companyData, y, checkdp);
+                        await missedDP(companyData, y, checkdp);
 
                         if (polarityChecks[0] == "true") {
 
-
                             await polarityChec(dp, companyData, y)
+                            console.log("/////////////////", dp , y , companyData)
                         }
                         else {
                             let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
@@ -380,10 +379,6 @@ function resValue(NIC) {
                                 // }
                             }
                             else if (numberCheck.finalUnit === 'Number' || numberCheck.finalUnit === 'Number (Tonne)' || numberCheck.finalUnit === 'Number (tCO2e)' || numberCheck.finalUnit === 'Currency' || numberCheck.finalUnit === 'Days' || numberCheck.finalUnit === 'Hours' || numberCheck.finalUnit === 'Miles' || numberCheck.finalUnit === 'Million Hours Worked' || numberCheck.finalUnit === 'No/Low/Medium/High/Very High' || numberCheck.finalUnit === 'Number (tCFCe)' || numberCheck.finalUnit === 'Number (Cubic meter)' || numberCheck.finalUnit === 'Number (KWh)' || numberCheck.finalUnit === 'Percentage' && polarityChecks[0] != "true" && numberCheck.signal == 'No') {
-
-                                //     if( companyData == '60435d460e4b652b0c71b71f' && dp == 'BOIR009') {
-                                //        console.log( dp, y, " ppppppppppppp " , numberCheck , response[0])
-                                //    }
                                 let responseValue = { $set: { performance: response[0] } }
                                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
 

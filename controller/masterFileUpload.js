@@ -156,6 +156,27 @@ exports.getAllCompany = async function (req, res) {
     }
 }
 
+exports.getAllNIC = async function (req, res) {
+    try {
+        await titleSchema.find({}).distinct('NIC_Code').then(nic => {
+            if (nic.length > 0) {
+                return res.status(200).json({
+                    message: 'Success.', status: 200, data: nic
+                })
+            }
+            else {
+                return res.status(400).json({
+                    message: 'NIC code not found ', status: 400
+                })
+            }
+        })
+    } catch (error) {
+        console.log('error=====>', error);
+        return error;
+
+    }
+}
+
 
 // Fetch new company data
 exports.getNewData = async function (req, res) {

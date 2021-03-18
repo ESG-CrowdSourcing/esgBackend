@@ -420,6 +420,8 @@ async function Minus(ruleValue, company, year, value) {
 async function ADD(company, year, ruleValue) {
     return new Promise(async (resolve, reject) => {
         let res = await clientData.find({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }).exec();
+        console.log(" DPCODE :  ", ruleValue[0].DPCode, " Year : ", year, " Response  :  ", res[0].response)
+
         if (res[0].response === " ") {
             let numparams = ruleValue[0].parameter.split(',')
 
@@ -452,6 +454,60 @@ async function ifcondition(checkDen, company, year) {
         resolve('updated')
     })
 }
+
+async function AsRatio(company, year, ruleValue) {
+    return new Promise(async (resolve, reject) => {
+
+        let res = await clientData.find({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }).exec();
+        // if (value == 'EMDR001' || value == 'EMDR003' || value == 'EMSR014') {
+        //     console.log(" DPCODE :  ", ruleValue[0].DPCode, " Year : ", year, " Response  :  ", res[0].response)
+        // }
+        if (res[0].response === " ") {
+            let param = ruleValue[0].parameter.split(',')
+            let checknum = await rule.find({ DPCode: param[0] }).exec();
+            let checkDen = await rule.find({ DPCode: param[1] }).exec();
+            if (checknum.length > 0 || checkDen.length > 0) {
+                await NUMDEN(checknum, checkDen, company, year)
+            }
+            let num = await clientData.find({ companyName: company, fiscalYear: year, DPCode: param[0] }).distinct('response').exec();
+            let Den = await clientData.find({ companyName: company, fiscalYear: year, DPCode: param[1] }).distinct('response').exec();
+            let response = await ratio(num[0], Den[0])
+
+            const updat = { $set: { response: response } }
+            await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }, updat).exec();
+            resolve('updated')
+
+        }
+        else {
+            const updat = { $set: { response: res[0].response } }
+            await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }, updat).exec();
+            resolve('updated')
+
+
+        }
+    })
+}
+
+async function AsPercentage(company, year, ruleValue, value) {
+    return new Promise(async (resolve, reject) => {
+        let res = await clientData.find({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }).exec();
+        if (res[0].response === " ") {
+            await Percentage(ruleValue, company, year, value)
+            resolve('updated')
+
+        }
+        else {
+            console.log(" DPCODE :  ", ruleValue[0].DPCode, " Year : ", year, " Response  :  ", res[0].response)
+
+            const updat = { $set: { response: res[0].response } }
+            await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, updat).exec();
+            resolve('updated')
+
+        }
+
+    })
+
+}
 exports.calc = function (req, res) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -472,88 +528,76 @@ exports.calc = function (req, res) {
                         let ruleValue = await rule.find({ DPCode: value }).exec()
 
                         if (ruleValue[0].methodName == 'Ratio') {
-                            let res = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: ruleValue[0].DPCode }).exec();
-                            if (res[0].response === " ") {
 
-                                let param = ruleValue[0].parameter.split(',')
-                                let checknum = await rule.find({ DPCode: param[0] }).exec();
-                                let checkDen = await rule.find({ DPCode: param[1] }).exec();
-                                if (checknum.length > 0 || checkDen.length > 0) {
-                                    await NUMDEN(checknum, checkDen, company[0]._id, year[y])
-                                }
-                                if (ruleValue[0].methodType == 'IF') {
 
-                                    await ifcondition(checkDen, company[0]._id, year[y])
-                                    let numerator = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[0] }).exec();
+                            let param = ruleValue[0].parameter.split(',')
+                            let checknum = await rule.find({ DPCode: param[0] }).exec();
+                            let checkDen = await rule.find({ DPCode: param[1] }).exec();
+                            if (checknum.length > 0 || checkDen.length > 0) {
+                                await NUMDEN(checknum, checkDen, company[0]._id, year[y])
+                            }
+                            if (ruleValue[0].methodType == 'IF') {
 
-                                    let numer = await sumCount(numerator[0].directors)
-                                    let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[1] }).distinct('response').exec();
-                                    let percentValue = 0.5 * Number(Den[0])
-                                    if (isNaN(numer[1]) || Den[0] === " ") {
-                                        let update = { $set: { response: 'NA' } }
-                                        await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
+                                await ifcondition(checkDen, company[0]._id, year[y])
+                                let numerator = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[0] }).exec();
 
-                                    }
-                                    else if (Number(numer[1]) < Number(percentValue)) {
-
-                                        let update = { $set: { response: 'NA' } }
-                                        await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
-
-                                    } else {
-
-                                        let response = await ratio(numer[0], numer[1])
-
-                                        let update = { $set: { response: response } }
-                                        await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
-                                    }
+                                let numer = await sumCount(numerator[0].directors)
+                                let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[1] }).distinct('response').exec();
+                                let percentValue = 0.5 * Number(Den[0])
+                                if (isNaN(numer[1]) || Den[0] === " ") {
+                                    let update = { $set: { response: 'NA' } }
+                                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
 
                                 }
-                                else {
+                                else if (Number(numer[1]) < Number(percentValue)) {
 
-                                    let num = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[0] }).distinct('response').exec();
-                                    let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[1] }).distinct('response').exec();
-                                    let response = await ratio(num[0], Den[0])
+                                    let update = { $set: { response: 'NA' } }
+                                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
 
-                                    const updat = { $set: { response: response } }
-                                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, updat).exec();
+                                } else {
+
+                                    let response = await ratio(numer[0], numer[1])
+
+                                    let update = { $set: { response: response } }
+                                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
                                 }
+
                             }
                             else {
-                                const updat = { $set: { response: res[0].response } }
-                                await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, updat).exec();
 
+                                let num = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[0] }).distinct('response').exec();
+                                let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: param[1] }).distinct('response').exec();
+                                let response = await ratio(num[0], Den[0])
+
+                                const updat = { $set: { response: response } }
+                                await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, updat).exec();
                             }
+
                         }
                         else if (ruleValue[0].methodName == 'Sum' || ruleValue[0].methodName == 'sum') {
                             let numparams = ruleValue[0].parameter.split(',')
                             await sumMethod(company[0]._id, year[y], numparams[0], ruleValue[0].DPCode);
                         }
+                        else if (ruleValue[0].methodName == 'AsPercentage') {
+                            await AsPercentage(company[0]._id, year[y], ruleValue, value)
+                        }
                         else if (ruleValue[0].methodName == 'Percentage' || ruleValue[0].methodName == 'AsPercentage') {
-                            let res = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: ruleValue[0].DPCode }).exec();
-                            if (res[0].response === " ") {
-                                if (ruleValue[0].methodType == 'sum,sum') {
-                                    let params = ruleValue[0].parameter.split(',')
-                                    let arr = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[0] }).exec();
 
-                                    let numer = await sum(arr[0].directors)
-                                    let arr1 = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[1] }).exec();
-                                    let deno = await sum(arr1[0].directors)
-                                    let respon = await percent(numer, deno)
-                                    let update = { $set: { response: respon } }
-                                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
-                                }
-                                else {
-                                    await Percentage(ruleValue, company[0]._id, year[y], value)
+                            if (ruleValue[0].methodType == 'sum,sum') {
+                                let params = ruleValue[0].parameter.split(',')
+                                let arr = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[0] }).exec();
 
-                                }
+                                let numer = await sum(arr[0].directors)
+                                let arr1 = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: params[1] }).exec();
+                                let deno = await sum(arr1[0].directors)
+                                let respon = await percent(numer, deno)
+                                let update = { $set: { response: respon } }
+                                await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, update).exec();
                             }
                             else {
-                                const updat = { $set: { response: res[0].response } }
-                                await clientData.updateOne({ companyName: company[0]._id, fiscalYear: year[y], DPCode: value }, updat).exec();
+                                await Percentage(ruleValue, company[0]._id, year[y], value)
 
                             }
-
-
                         }
                         else if (ruleValue[0].methodName == 'count of') {
                             let numparams = ruleValue[0].parameter.split(',')
@@ -564,10 +608,17 @@ exports.calc = function (req, res) {
                             await Minus(ruleValue, company[0]._id, year[y], value)
                         }
                         else if (ruleValue[0].methodName == 'ADD') {
+
                             await ADD(company[0]._id, year[y], ruleValue)
+                        }
+                        else if (ruleValue[0].methodName == 'AsRatio') {
+                            await AsRatio(company[0]._id, year[y], ruleValue)
+
                         }
                         else if (ruleValue[0].methodName == 'Multiply') {
                             let res = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: ruleValue[0].DPCode }).exec();
+                            console.log(" DPCODE :  ", ruleValue[0].DPCode, " Year : ", year[y], " Response  :  ", res[0].response)
+
                             if (res[0].response === " ") {
                                 let numparams = ruleValue[0].parameter.split(',')
 
@@ -601,6 +652,8 @@ exports.calc = function (req, res) {
                         }
                         else if (ruleValue[0].methodName == 'Condition') {
                             let res = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: ruleValue[0].DPCode }).exec();
+                            console.log(" DPCODE :  ", ruleValue[0].DPCode, " Year : ", year[y], " Response  :  ", res[0].response)
+
                             if (res[0].response === " ") {
                                 let numparams = ruleValue[0].parameter.split(',')
 
@@ -626,6 +679,8 @@ exports.calc = function (req, res) {
                         }
                         else if (ruleValue[0].methodName == 'As') {
                             let res = await clientData.find({ companyName: company[0]._id, fiscalYear: year[y], DPCode: ruleValue[0].DPCode }).exec();
+                            console.log(" DPCODE :  ", ruleValue[0].DPCode, " Year : ", year[y], " Response  :  ", res[0].response)
+
                             if (res[0].response === " ") {
                                 let numparams = ruleValue[0].parameter.split(',')
 

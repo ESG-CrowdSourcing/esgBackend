@@ -27,7 +27,7 @@ exports.companyDetails = async function (req, res) {
 
         return res.status(200).json({
             message: 'file upload has been completed.',
-            missedDPCodes: missedDP,
+            // missedDPCodes: missedDP,
             status: 200,
         });
     // },1800)
@@ -74,6 +74,7 @@ function compare(companyName) {
     
     })
 }
+
 
 async function compareTaxonomy(arr1, arr2) {
     return new Promise(async (resolve, reject) => {

@@ -4,7 +4,8 @@ var cmpany = require('../controller/company');
 var master = require('../controller/masterTaxonomy');
 var controversy= require('../controller/controversy')
 var calculation = require('../controller/Calculation');
-var percentile = require('../controller/percentile')
+var percentile = require('../controller/percentile');
+const { get } = require('lodash');
 module.exports = function (app) {
 
     const storage = multer.diskStorage({
@@ -29,6 +30,7 @@ module.exports = function (app) {
     // app.route('/package/:companyName').get(masterFileUpload.package);
     app.route('/getNewData/:companyName').get(masterFileUpload.getNewData);
     app.route('/getAllCompany').get(masterFileUpload.getAllCompany)
+    app.route('/getNICCode').get(masterFileUpload.getAllNIC);
     // app.route('/getDirectiveData/:companyName').post(masterFileUpload.getNewDataDir);
 
     app.route('/percentile/:NIC').post( percentile.percentile)
