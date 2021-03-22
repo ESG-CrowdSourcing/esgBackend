@@ -76,7 +76,11 @@ async function negative(dp, companyData, y, values, response, stdDev) {
         } else {
 
             var avg = await average(dp, companyData, y, values);
+
             let negativeValue = (avg - response) / stdDev
+            if(dp == 'BOCR006' && companyData == '605599e2bce4a42fe4de6b62'){
+                console.log( " company : " , companyData , " year : " , y , "Dpcode "  , dp ,  " ARRRRRRRRRRRR  " , values , "Response : " ,response ,"Average  :  " ,avg, " stdDEv :  " , stdDev , " negativeValuw : " ,negativeValue)
+            }
             resolve(negativeValue)
         }
     })
@@ -96,6 +100,7 @@ exports.percentile = function (req, res) {
 
         try {
             var NIC = req.params.NIC
+            console.log(isNaN(NaN))
 
             let Nic_code = await company.find({ companyName: NIC }).distinct('NIC_Code').exec()
             let companyName = await company.find({ NIC_Code: Nic_code[0] }).distinct('_id').exec()
@@ -109,7 +114,6 @@ exports.percentile = function (req, res) {
                     let dpValues = await companyDetails(dp, y, companyName)
 
                     companyName.forEach(async (companyData) => {
-
 
                         let polarityCheck = await data.find({ DPCode: dp, percentile: 'Yes' }).distinct('polarity').exec()
                         let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
@@ -155,16 +159,11 @@ exports.percentile = function (req, res) {
 function percentileCalc(value, dp, companyData, y) {
     return new Promise(async (resolve, reject) => {
 
-        let percentile;
-        if (y == "Fiscal Year") {
-            resolve('updated')
-
-        }
-        else {
+        let percentile;        
 
             if (value === 'NA' || isNaN(value)) {
 
-                let responseValue = { $set: { performance: 'NA' } }
+                let responseValue = { $set: { response : 'NA',performance: 'NA' } }
                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
             }
             else if (value > 4) {
@@ -187,12 +186,15 @@ function percentileCalc(value, dp, companyData, y) {
                 let ztValues = zt[0].values;
                 let ztl = ztValues[v]
                 percentile = ztl * 100
-
+                if(dp == 'BOCR006' && companyData == '605599e2bce4a42fe4de6b62'){
+                    console.log( " company : " , companyData , " year : " , y , "Dpcode "  , dp ,  " ARRRRRRRRRRRR  " , value , " percentile : " ,percentile)
+                }
                 let responseValue = { $set: { performance: percentile } }
                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
             }
+            
             resolve('updated')
-        }
+        
 
     })
 }
@@ -229,10 +231,8 @@ function polarityChec(dp, companyData, y) {
             let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
 
             let polarityChe = await polaritySchema.find({ DPCode: dp }).exec()
-            if (y == 'Fiscal Year') {
-            }
-            else {
-                if (response[0] == 'NA' || response[0] === " ") {
+            
+                if (response[0] == 'NA' || response[0] === " " || isNaN(response[0])) {
                     let responseValue = { $set: { performance: 'NA', response: 'NA' } }
                     await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
                 }
@@ -282,7 +282,7 @@ function polarityChec(dp, companyData, y) {
                     
                 }
 
-            }
+           
             resolve('updated')
         } catch (error) {
             reject(error)
@@ -330,10 +330,10 @@ async function resValue(NIC) {
                     let polarityChecks = await data.find({ DPCode: dp }).distinct('polarityCheck').exec()
                     let numberCheck = await data.findOne({ DPCode: dp }).exec()
                     companyName.forEach(async (companyData) => {
-                        let clientdp = await clientData.find({ companyName: companyData, fiscalYear: y }).distinct('DPCode').exec()
+                        // let clientdp = await clientData.find({ companyName: companyData, fiscalYear: y }).distinct('DPCode').exec()
 
-                        let checkdp = await compareValues(clientdp, dpCodes)
-                        await missedDP(companyData, y, checkdp);
+                        // let checkdp = await compareValues(clientdp, dpCodes)
+                        // await missedDP(companyData, y, checkdp);
 
                         if (polarityChecks[0] == "true") {
 
@@ -341,13 +341,13 @@ async function resValue(NIC) {
                         }
                         else {
                             let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
-                            if (response[0] === 'Y' || response[0] == 'y') {
+                            if (response[0] === 'Yes' || response[0] == 'yes') {
                                 if (polarityCheck[0] === 'Negative') {
-                                    let responseValue = { $set: { performance: 'N' } }
+                                    let responseValue = { $set: { performance: 'No' } }
                                     await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
                                 }
                                 else if (polarityCheck[0] === 'Positive') {
-                                    let responseValue = { $set: { performance: 'Y' } }
+                                    let responseValue = { $set: { performance: 'Yes' } }
                                     await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
                                 }
                                 else if (polarityCheck[0] === 'Neutral') {
@@ -355,13 +355,13 @@ async function resValue(NIC) {
                                     await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
                                 }
                             }
-                            else if (response[0] === 'N') {
+                            else if (response[0] === 'No') {
                                 if (polarityCheck[0] === 'Negative') {
-                                    let responseValue = { $set: { performance: 'Y' } }
+                                    let responseValue = { $set: { performance: 'Yes' } }
                                     await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
                                 }
                                 else if (polarityCheck[0] === 'Positive') {
-                                    let responseValue = { $set: { performance: 'N' } }
+                                    let responseValue = { $set: { performance: 'No' } }
                                     await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
                                 }
                                 else if (polarityCheck[0] === 'Neutral') {
@@ -370,7 +370,7 @@ async function resValue(NIC) {
                                 }
 
                             }
-                            else if (response[0] == 'NA' || response[0] === " ") {
+                            else if (response[0] == 'NA' || response[0] === " " || isNaN(response[0])) {
                                 // if (polarityCheck[0] === 'Positive' || polarityCheck[0] === 'Negative' || polarityCheck[0] === 'Neutral') {
                                 let responseValue = { $set: { performance: 'NA', response: 'NA' } }
                                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()

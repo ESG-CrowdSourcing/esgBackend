@@ -13,6 +13,7 @@ var ztableSchema = require('../model/zTable');
 var polaritySchema = require('../model/polarity')
 var dirSchema = require('../model/dir')
 mongoose.Schema.Types.Boolean.convertToFalse.add('');
+var dataCollectionSchema = require('../model/dpCode');
 
 
 var controversySchema = require('../model/controversy')
@@ -288,71 +289,69 @@ exports.fileUploadMaster = (dir, company, caragoryData) => {
     return new Promise(async (resolve, reject) => {
         let data = await dataSchema.find({ companyName: company._id, DPCode: caragoryData['DP Code'] }).exec()
         // if( caragoryData['Fiscal Year'] != 'Fiscal Year'){
-
-        
-        if (dir.length == 0) {
-            if (data.length > 1) {
-                resolve(data[0])
+        let dataCollection = await dataCollectionSchema.find({ dataCollection: 'Yes' }).distinct('DPCode').exec();
+        if (dataCollection.includes(caragoryData['DP Code']) || caragoryData['DP Code'] == 'Category') {
+            if (dir.length == 0) {
+                if (data.length > 1) {
+                    resolve(data[0])
+                }
+                else {
+                    const dataSche = new dataSchema({
+                        _id: new mongoose.Types.ObjectId(),
+                        companyName: company._id,
+                        DPCode: caragoryData['DP Code'],
+                        DPType: caragoryData['Data Type'],
+                        description: caragoryData['Description'],
+                        unit: caragoryData['Unit'],
+                        fiscalYear: caragoryData['Fiscal Year'],
+                        indicator: caragoryData['Indicator'],
+                        fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                        response: caragoryData['Response'],
+                        sourceName: caragoryData['Source name'],
+                        sourceURL: caragoryData['URL'],
+                        sourcePublicationDate: caragoryData['Publication date'],
+                        pageNumber: caragoryData['Page number'],
+                        snapshot: caragoryData['Text snippet'],
+                        comments: caragoryData['Comments/Calculations'],
+                    }).save().then(themed => {
+                        resolve(themed);
+                    });
+                }
             }
             else {
-                const dataSche = new dataSchema({
-                    _id: new mongoose.Types.ObjectId(),
-                    companyName: company._id,
-                    DPCode: caragoryData['DP Code'],
-                    DPType: caragoryData['Data Type'],
-                    description: caragoryData['Description'],
-                    unit: caragoryData['Unit'],
-                    fiscalYear: caragoryData['Fiscal Year'],
-                    indicator: caragoryData['Indicator'],
-                    fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
-                    response: caragoryData['Response'],
-                    sourceName: caragoryData['Source name'],
-                    sourceURL: caragoryData['URL'],
-                    sourcePublicationDate: caragoryData['Publication date'],
-                    pageNumber: caragoryData['Page number'],
-                    snapshot: caragoryData['Text snippet'],
-                    comments: caragoryData['Comments/Calculations'],
-                }).save().then(themed => {
-                    resolve(themed);
-                });
+                if (data.length > 1) {
+                    resolve(data[0])
+                }
+                else {
+                    let directors = await director(dir, caragoryData);
+
+                    const dataSche = new dataSchema({
+                        _id: new mongoose.Types.ObjectId(),
+                        companyName: company._id,
+                        DPCode: caragoryData['DP Code'],
+                        DPType: caragoryData['Data Type'],
+                        description: caragoryData['Description'],
+                        unit: caragoryData['Unit'],
+                        fiscalYear: caragoryData['Fiscal Year'],
+                        indicator: caragoryData['Indicator'],
+                        fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                        response: caragoryData['Response'],
+                        sourceName: caragoryData['Source name'],
+                        sourceURL: caragoryData['URL'],
+                        sourcePublicationDate: caragoryData['Publication date'],
+                        pageNumber: caragoryData['Page number'],
+                        snapshot: caragoryData['Text snippet'],
+                        comments: caragoryData['Comments/Calculations'],
+                        directors: directors
+                    }).save().then(themed => {
+                        resolve(themed);
+                    });
+                }
             }
         }
         else {
-            if (data.length > 1) {
-                resolve(data[0])
-            }
-            else {
-                let directors = await director(dir, caragoryData);
-
-                const dataSche = new dataSchema({
-                    _id: new mongoose.Types.ObjectId(),
-                    companyName: company._id,
-                    DPCode: caragoryData['DP Code'],
-                    DPType: caragoryData['Data Type'],
-                    description: caragoryData['Description'],
-                    unit: caragoryData['Unit'],
-                    fiscalYear: caragoryData['Fiscal Year'],
-                    indicator: caragoryData['Indicator'],
-                    fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
-                    response: caragoryData['Response'],
-                    sourceName: caragoryData['Source name'],
-                    sourceURL: caragoryData['URL'],
-                    sourcePublicationDate: caragoryData['Publication date'],
-                    pageNumber: caragoryData['Page number'],
-                    snapshot: caragoryData['Text snippet'],
-                    comments: caragoryData['Comments/Calculations'],
-                    directors: directors
-                }).save().then(themed => {
-                    resolve(themed);
-                });
-            }
+            resolve(caragoryData['DP Code'])
         }
-    // }
-    // else{
-    //     let 
-    //    resolve();
-    // }
-
     });
 }
 
