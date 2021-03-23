@@ -35,7 +35,7 @@ let companyName ;
             missedDPCodes: missedDP,
             status: 200,
         });
-         },1800)
+         },1000)
 
     } catch (error) {
         return res.status(402).json({
@@ -48,7 +48,7 @@ let companyName ;
 
 async function compare(companyName) {
     return new Promise(async (resolve, reject) => {
-        let dpCodes = await data.find({ dataCollection: 'Yes' }).distinct('DPCode').exec()
+        let dpCodes = await data.find({ dataCollection: 'Yes' , relevantForIndia:'Yes' }).distinct('DPCode').exec()
 
         let yearData = [], yearValue = {}
 

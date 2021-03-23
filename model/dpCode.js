@@ -25,6 +25,10 @@ var dataSchema = new schema({
         type: String,
         required: false
     },
+    functions: {
+        type: String,
+        required: false
+    },
     unit: {
         type: String,
         required: false

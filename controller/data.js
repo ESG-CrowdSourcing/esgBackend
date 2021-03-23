@@ -1,59 +1,78 @@
 var dataSchema = require('../model/data')
 var mongoose = require('mongoose')
 var matrix = require('../model/dpCode')
+var dpSchema = require('../model/dpCode');
+const { result } = require('lodash');
 
-exports.getDirectors =(director)=>{
+
+exports.getDirectors = (director) => {
     return new Promise(async (resolve, reject) => {
-    dataSchema.find({directors:director.directors}).exec().then(data=>{
-        director.keys= data
-        resolve(director)
-    })
+        dataSchema.find({ directors: director.directors }).exec().then(data => {
+            director.keys = data
+            resolve(director)
+        })
     })
 }
 
-async function file(company,fiscal , matrix){
-    var dataValues =[], datapoints={};
+async function file(company, derviedValues, fiscal, matrix) {
+    return new Promise(async (resolve, reject) => {
 
-    for( let fi =0 ;fi< fiscal.length ;fi++){
-        if(matrix.includes(fiscal[fi].DPCode)){
+        var dataValues = [], datapoints = {} , missed = [], result =[]
 
-        }
-        else{
-            let del = await dataSchema.deleteMany({companyName:company,performance:""}).exec();
-            datapoints={
-                Year:fiscal[fi].fiscalYear,
-                DPCode : fiscal[fi].DPCode,
-                Response:fiscal[fi].response,
-                PerformanceResponse:fiscal[fi].performance,
+        for (let fi = 0; fi < fiscal.length; fi++) {
+            if (matrix.includes(fiscal[fi].DPCode)) {
+
             }
-            dataValues.push(datapoints);
+            else {
+              //  let del = await dataSchema.deleteMany({ companyName: company, performance: "" }).exec();
+                missed.push(fiscal[fi].DPCode);
+                datapoints = {
+                    Year: fiscal[fi].fiscalYear,
+                    DPCode: fiscal[fi].DPCode,
+                    Response: fiscal[fi].response,
+                    PerformanceResponse: fiscal[fi].performance,
+                }
+                dataValues.push(datapoints);
+            }
         }
-    }
-    return dataValues;
+        result.push(missed)
+        result.push(dataValues)
+        resolve(result);
+    })
+}
+
+async function compare(arr1, arr2) {
+    return new Promise(async (resolve, reject) => {
+        var res = arr1.filter(x => !arr2.includes(x));
+         console.log('dddddddddddddddddddd ' , res)
+        resolve(res);
+    })
+
 }
 exports.getAllData = (company) => {
-    var  yearValues=[], yearData={};
+    var yearValues = [], yearData = {};
     return new Promise(async (resolve, reject) => {
+        console.log ("<<<<<<<<<<", Number(33.33) >= Number(33.33))
         // let data=await dataSchema.find({keyIssuesID:keyIssues._id}).exec()
-            let year =await dataSchema.find({companyName: company}).distinct('fiscalYear')
-            for(let yr=0; yr < year.length ;yr++){
-                if(year[yr] == 'Fiscal Year'){
-                    
-                }
-                else{
-                    let matrixValue = await matrix.find({standaloneMatrix:'Matrix'}).distinct('DPCode').exec();
-                    let fiscal = await dataSchema.find({companyName: company,fiscalYear: year[yr]}).exec()
+        let year = await dataSchema.find({ companyName: company }).distinct('fiscalYear')
+        for (let yr = 0; yr < year.length; yr++) {
 
-                    let f = await file(company ,fiscal , matrixValue);
-                    yearData={ year: year[yr],
-                               Data: f}
-                   yearValues.push(yearData)
-                   } 
-                }
-                
-     
-resolve(yearValues)
-        
+            let matrixValue = await matrix.find({ standaloneMatrix: 'Matrix' }).distinct('DPCode').exec();
+            let fiscal = await dataSchema.find({ companyName: company, fiscalYear: year[yr] }).exec()
+
+            let dpValueCheck = await dpSchema.find({ dataCollection: 'No', }).distinct('DPCode').exec()
+            let f = await file(company, dpValueCheck, fiscal, matrixValue);
+
+            yearData = {
+                year: year[yr],
+                Data: f[1]
+            }
+            await compare(dpValueCheck, f[0])
+            yearValues.push(yearData)
+
+        }
+        resolve(yearValues)
+
 
     });
 }

@@ -7,7 +7,8 @@ const { response } = require('express');
 const { values } = require('lodash');
 var data = require('../model/dpCode')
 var mongoose = require('mongoose');
-const  { getJsDateFromExcel }  = require("excel-date-to-js")
+const { getJsDateFromExcel } = require("excel-date-to-js")
+var moment = require('moment')
 
 // debugger
 
@@ -77,7 +78,6 @@ async function ratio(Num, Den) {
                 let deno = await comma(Den)
 
                 var num = Number(numer), den = Number(deno)
-                // console.log( " VAlue " ,  Num , Den , " VAlue " , numer , deno)
 
                 value = num / den;
                 resolve(value)
@@ -201,7 +201,9 @@ async function sumCount(arr) {
                 resolve('NA')
             }
             else {
-                let a = arr.filter(e => String(e).trim());
+                let ar = arr.filter(e => String(e).trim());
+                let a = ar.filter(e => e!='NA');
+
                 let Arra = await arrComma(a);
                 let Arr = Arra.map(i => Number(i));
 
@@ -228,7 +230,7 @@ async function sum(arr) {
     return new Promise(async (resolve, reject) => {
         try {
             if (!Array.isArray(arr)) {
-                console.log(" value is 0")
+                resolve('NA')
             }
             else {
                 let a = arr.filter(e => String(e).trim());
@@ -283,7 +285,7 @@ async function compositeCount(arra1, arra2, criteria) {
 async function count(arr, criteria) {
     return new Promise(async (resolve, reject) => {
         let aarr = arr.filter(e => String(e).trim());
-        let Arr =aarr.filter(e => e!='NA')
+        let Arr = aarr.filter(e => e != 'NA')
 
         try {
             if (!Array.isArray(arr)) {
@@ -361,33 +363,23 @@ async function sumMethod(company, year, value, dpcode) {
     return new Promise(async (resolve, reject) => {
         let sumValue;
         let arr = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
-        if (arr.length === 0) {
-            sumValue = 0;
-        } else {
-            sumValue = await sum(arr[0].directors)
-        }
 
-        let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: dpcode }).exec();
-
-        if (dpCheck.length == 0) {
-
-            const category = new clientData({
-                _id: new mongoose.Types.ObjectId(),
-                companyName: company,
-                fiscalYear: year,
-                DPCode: dpcode,
-                response: sumValue,
-                performance: ''
-            }).save()
-            resolve('success')
-        }
-        else {
-            let update = { $set: { response: sumValue } }
-            await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: dpcode }, update).exec();
-            resolve('success')
+        if (arr.length > 0) {
+            if (arr.length === 0) {
+                sumValue = 0;
+            } else {
+                sumValue = await sum(arr[0].directors)
+            }
+            await DPCHECK(company, year, dpcode, sumValue)
+            resolve('Sucess')
 
         }
+        else if (arr[0] == undefined) {
+            await DPCHECK(company, year, dpcode, 'NA')
+            resolve('Sucess')
 
+
+        }
 
     })
 }
@@ -533,11 +525,17 @@ async function Percentage(ruleValue, company, year, value) {
         let params = ruleValue[0].parameter.split(',')
         let checknum = await rule.find({ DPCode: params[0] }).exec();
         let checkDen = await rule.find({ DPCode: params[1] }).exec();
+
+
         if (checknum.length > 0) {
             await NUM(checknum, company, year)
+            resolve('success')
+
         }
         if (checkDen.length > 0) {
             await DEN(checkDen, company, year)
+            resolve('success')
+
         }
 
         let num = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[0] }).distinct('response').exec();
@@ -566,6 +564,36 @@ async function Percentage(ruleValue, company, year, value) {
     })
 }
 
+async function DPCHECK(company, year, value, response) {
+    return new Promise(async (resolve, reject) => {
+        let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
+
+        if (dpCheck.length == 0) {
+            const category = new clientData({
+                _id: new mongoose.Types.ObjectId(),
+                companyName: company,
+                fiscalYear: year,
+                DPCode: value,
+                response: response,
+                performance: ''
+            }).save()
+            resolve('success')
+
+
+        }
+        else {
+
+            let update = { $set: { response: response } }
+            await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+            resolve('success')
+
+        }
+
+
+    })
+
+}
+
 async function Countof(ruleValue, company, year, numparams, value) {
     return new Promise(async (resolve, reject) => {
 
@@ -576,39 +604,26 @@ async function Countof(ruleValue, company, year, numparams, value) {
                 let arr1 = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[0] }).exec();
                 let arr2 = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[1] }).exec();
 
-                let response = await compositeCount(arr1[0].directors, arr2[0].directors, ruleValue[0].criteria)
-                let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
-
-                if (dpCheck.length == 0) {
-                    const category = new clientData({
-                        _id: new mongoose.Types.ObjectId(),
-                        companyName: company,
-                        fiscalYear: year,
-                        DPCode: value,
-                        response: response,
-                        performance: ''
-                    }).save()
-                    resolve('success')
-
-
-                }
-                else {
-                    let update = { $set: { response: response } }
-                    await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+                if (arr1.length > 0 || arr2.length > 0) {
+                    let response = await compositeCount(arr1[0].directors, arr2[0].directors, ruleValue[0].criteria)
+                    await DPCHECK(company, year, value, response)
                     resolve('success')
 
                 }
+                else if (arr1[0] == undefined || arr2[0] == undefined) {
+                    await DPCHECK(company, year, value, 'NA')
+                    resolve('success')
 
+                }
             }
             else {
                 for (let p = 0; p < params.length; p++) {
                     let respon = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[p] }).distinct('response').exec();
-                    // let respon = await count(arr[0].directors, ruleValue[0].criteria)
 
                     if (respon[0] == 'Yes' || respon[0] == 'Y') {
-                        total ++;
+                        total++;
                     } else {
-                        total ;
+                        total;
                     }
                 }
 
@@ -634,32 +649,53 @@ async function Countof(ruleValue, company, year, numparams, value) {
             }
         }
         else {
+
             let arr = await clientData.find({ companyName: company, fiscalYear: year, DPCode: numparams }).exec();
-            let countValue = await count(arr[0].directors, ruleValue[0].criteria)
-            let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
 
-            if (dpCheck.length == 0) {
+            if (arr.length > 0) {
+                let countValue = await count(arr[0].directors, ruleValue[0].criteria)
 
-                const category = new clientData({
-                    _id: new mongoose.Types.ObjectId(),
-                    companyName: company,
-                    fiscalYear: year,
-                    DPCode: value,
-                    response: countValue,
-                    performance: ''
-                }).save()
+                await DPCHECK(company, year, value, countValue)
                 resolve('success')
 
 
             }
-            else {
-                let update = { $set: { response: countValue } }
-                await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+            else if (arr[0] == undefined) {
+                await DPCHECK(company, year, value, 'NA')
                 resolve('success')
 
+
             }
+
         }
 
+    })
+}
+
+async function minusValue (arrNum,arrDen , Den,num){
+    return new Promise(async (resolve, reject) => {
+        let directors = []
+
+        for (let i =0 ; i< arrNum.length ; i++) {
+            if( arrNum[i] == ' '){
+                directors.push('NA')
+            }
+            else{
+             let ss1 = getJsDateFromExcel(arrNum[i])
+             let ss2 ;
+             if(arrDen[i] == ' '){
+                ss2 = getJsDateFromExcel( Den[0].fiscalYearEnddate)
+             }
+             else{
+                 ss2 = getJsDateFromExcel(arrDen[i]) 
+             }
+             var response = moment([ss2.getUTCFullYear() ,ss2.getUTCMonth() ,ss2.getUTCDate()]).diff(moment([ss1.getUTCFullYear() ,ss1.getUTCMonth() ,ss1.getUTCDate()]), 'years', true)
+             directors.push(response)
+ 
+            }
+        }
+        resolve(directors)
+    
     })
 }
 
@@ -667,43 +703,51 @@ async function Minus(ruleValue, company, year, value) {
     return new Promise(async (resolve, reject) => {
 
         let params = ruleValue[0].parameter.split(',')
-        let num = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[0] }).distinct('fiscalYearEnddate').exec();
-        let Den = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[1] }).exec();
-        let denDir = Den[0].directors
+        let num = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[1] }).exec();
+        let Den = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[0] }).exec();
+        
+        let arrNum = num[0].directors;
+        let arrDen = Den[0].directors;
+        let directors = await minusValue(arrNum,arrDen,Den,num)
+       let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
+       if (dpCheck.length == 0) {
+           const category = new clientData({
+               _id: new mongoose.Types.ObjectId(),
+               companyName: company,
+               fiscalYear: year,
+               DPCode: value,
+               directors: directors,
+               performance: ''
+           }).save()
+           resolve('success')
 
-    //     var date2 = getJsDateFromExcel(num[0])
-    //     var date1 = getJsDateFromExcel(denDir[0]);
-          console.log("            "   , date2 , date1 ,"          " ,Math.round((date2-date1)/(1000*60*60*24)));
+       }
+       else {
+           let update = { $set: { directors:directors } }
+           await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+           resolve('success')
 
-        let response = await minus(num[0], denDir[0])
-        let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
+       }
 
-        if (dpCheck.length == 0) {
-            const category = new clientData({
-                _id: new mongoose.Types.ObjectId(),
-                companyName: company,
-                fiscalYear: year,
-                DPCode: value,
-                response: response,
-                performance: ''
-            }).save()
-            resolve('success')
-
-        }
-        else {
-            let update = { $set: { response: response } }
-            await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
-            resolve('success')
-
-        }
     })
 }
 
 async function ADD(company, year, ruleValue) {
     return new Promise(async (resolve, reject) => {
         let res = await clientData.find({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }).exec();
+        if (res[0] == undefined){
+            const category = new clientData({
+                _id: new mongoose.Types.ObjectId(),
+                companyName: company,
+                fiscalYear: year,
+                DPCode: ruleValue[0].DPCode,
+                response: 'NA',
+                performance: ''
+            }).save()
+            resolve('updated')
+        }
 
-        if (res[0].response === " ") {
+       else if (res[0].response === " ") {
             let numparams = ruleValue[0].parameter.split(',')
 
             let num = await clientData.find({ companyName: company, fiscalYear: year, DPCode: numparams[0] }).distinct('response').exec();
@@ -731,7 +775,8 @@ async function ADD(company, year, ruleValue) {
 
             }
         }
-        else {
+        
+        else  {
             const updat = { $set: { response: res[0].response } }
             await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }, updat).exec();
             resolve('updated')
@@ -850,92 +895,6 @@ async function Ratio(company, y, ruleValue, value) {
         let param = ruleValue[0].parameter.split(',')
         let checknum = await rule.find({ DPCode: param[0] }).exec();
         let checkDen = await rule.find({ DPCode: param[1] }).exec();
-
-        if (ruleValue[0].methodType == 'IF') {
-
-            await ifcondition(checkDen, company[0]._id, y)
-            let numerator = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[0] }).exec();
-
-            let numer = await sumCount(numerator[0].directors)
-            let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[1] }).distinct('response').exec();
-            let percentValue = 0.5 * Number(Den[0])
-            let dpCheck = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: value }).exec();
-
-            if(ruleValue[0].DPCode == 'BOIR015')
-{
-    console.log( " DP  : " , value , "NUMBER NUmerator : " , numer , " per" )
-}
-            if (isNaN(numer[1]) || Den[0] === " ") {
-
-                if (dpCheck.length == 0) {
-                    const category = new clientData({
-                        _id: new mongoose.Types.ObjectId(),
-                        companyName: company[0]._id,
-                        fiscalYear: y,
-                        DPCode: ruleValue[0].DPCode,
-                        response: 'NA',
-                        performance: ''
-                    }).save()
-                    resolve('updated')
-
-
-                }
-                else {
-                    let update = { $set: { response: 'NA' } }
-                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: y, DPCode: value }, update).exec();
-                    resolve('updated')
-
-                }
-            }
-            else if (Number(numer[1]) < Number(percentValue)) {
-
-
-                if (dpCheck.length == 0) {
-                    const category = new clientData({
-                        _id: new mongoose.Types.ObjectId(),
-                        companyName: company[0]._id,
-                        fiscalYear: y,
-                        DPCode: ruleValue[0].DPCode,
-                        response: 'NA',
-                        performance: ''
-                    }).save()
-                    resolve('updated')
-
-
-                }
-                else {
-                    let update = { $set: { response: 'NA' } }
-                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: y, DPCode: value }, update).exec();
-                    resolve('updated')
-
-                }
-            } else {
-
-                let response = await ratio(numer[0], numer[1])
-                if (dpCheck.length == 0) {
-                    const category = new clientData({
-                        _id: new mongoose.Types.ObjectId(),
-                        companyName: company[0]._id,
-                        fiscalYear: y,
-                        DPCode: ruleValue[0].DPCode,
-                        response: response,
-                        performance: ''
-                    }).save()
-                    resolve('updated')
-
-
-                }
-                else {
-                    let update = { $set: { response: response } }
-                    await clientData.updateOne({ companyName: company[0]._id, fiscalYear: y, DPCode: ruleValue[0].DPCode }, update).exec();
-                    resolve('updated')
-
-                }
-            }
-
-        }
-        else {
-            
         if (checknum.length > 0) {
             await NUM(checknum, company[0]._id, y)
         }
@@ -943,12 +902,95 @@ async function Ratio(company, y, ruleValue, value) {
             await DEN(checkDen, company[0].id, y)
         }
 
+        if (ruleValue[0].methodType == 'IF') {
+
+
+                await ifcondition(checkDen, company[0]._id, y)
+                let numerator = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[0] }).exec();
+
+                let numer = await sumCount(numerator[0].directors)
+                let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[1] }).distinct('response').exec();
+                let percentValue = 0.5 * Number(Den[0])
+                let dpCheck = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: value }).exec();
+                if (isNaN(numer[1]) || Den[0] === " ") {
+
+                    if (dpCheck.length == 0) {
+                        const category = new clientData({
+                            _id: new mongoose.Types.ObjectId(),
+                            companyName: company[0]._id,
+                            fiscalYear: y,
+                            DPCode: ruleValue[0].DPCode,
+                            response: 'NA',
+                            performance: ''
+                        }).save()
+                        resolve('updated')
+
+
+                    }
+                    else {
+                        let update = { $set: { response: 'NA' } }
+                        await clientData.updateOne({ companyName: company[0]._id, fiscalYear: y, DPCode: value }, update).exec();
+                        resolve('updated')
+
+                    }
+                }
+                else if (Number(numer[1]) < Number(percentValue)) {
+
+
+                    if (dpCheck.length == 0) {
+                        const category = new clientData({
+                            _id: new mongoose.Types.ObjectId(),
+                            companyName: company[0]._id,
+                            fiscalYear: y,
+                            DPCode: ruleValue[0].DPCode,
+                            response: 'NA',
+                            performance: ''
+                        }).save()
+                        resolve('updated')
+
+
+                    }
+                    else {
+                        let update = { $set: { response: 'NA' } }
+                        await clientData.updateOne({ companyName: company[0]._id, fiscalYear: y, DPCode: value }, update).exec();
+                        resolve('updated')
+
+                    }
+                } else {
+
+                    let response = await ratio(numer[0], numer[1])
+                    if (dpCheck.length == 0) {
+                        const category = new clientData({
+                            _id: new mongoose.Types.ObjectId(),
+                            companyName: company[0]._id,
+                            fiscalYear: y,
+                            DPCode: ruleValue[0].DPCode,
+                            response: response,
+                            performance: ''
+                        }).save()
+                        resolve('updated')
+
+
+                    }
+                    else {
+                        let update = { $set: { response: response } }
+                        await clientData.updateOne({ companyName: company[0]._id, fiscalYear: y, DPCode: ruleValue[0].DPCode }, update).exec();
+                        resolve('updated')
+
+                    }
+                }
+            
+        }
+        else {
+
+
+
             let num = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[0] }).distinct('response').exec();
             let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[1] }).distinct('response').exec();
             let response = await ratio(num[0], Den[0])
             let dpCheck = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: value }).exec();
-
-            if (dpCheck.length == 0) {
+            
+                        if (dpCheck.length == 0) {
                 const category = new clientData({
                     _id: new mongoose.Types.ObjectId(),
                     companyName: company[0]._id,
@@ -1048,8 +1090,7 @@ async function PercentageValue(company, y, value, ruleValue) {
 exports.calc = function (req, res) {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("Company Name : ", req.params.companyName);
-            
+
             let company = await companytitle.find({ companyName: req.params.companyName }).exec()
             let year = await clientData.find({ companyName: company[0]._id }).distinct('fiscalYear').exec()
             year.forEach(async (y) => {
@@ -1071,14 +1112,20 @@ exports.calc = function (req, res) {
                             let numparams = ruleValue[0].parameter.split(',')
                             await sumMethod(company[0]._id, y, numparams[0], ruleValue[0].DPCode);
                         }
-                        else if (value == 'MACR002' ){
+                        else if (value == 'MACR002' || value == 'MACR007' || value == 'MACR010') {
                             await Ratio(company, y, ruleValue, value)
 
                         }
+
+                        else if (ruleValue[0].methodName == 'Minus') {
+
+                            await Minus(ruleValue, company[0]._id, y, value)
+                        }
                         setTimeout(async () => {
 
-                       
-                        if (ruleValue[0].methodName == 'Ratio') {
+
+                            if (ruleValue[0].methodName == 'Ratio') {
+
                                 await Ratio(company, y, ruleValue, value)
 
                             }
@@ -1095,10 +1142,6 @@ exports.calc = function (req, res) {
                                 await PercentageValue(company, y, value, ruleValue)
                             }
 
-                            else if (ruleValue[0].methodName == 'Minus') {
-
-                                await Minus(ruleValue, company[0]._id, y, value)
-                            }
                             else if (ruleValue[0].methodName == 'ADD') {
 
                                 await ADD(company[0]._id, y, ruleValue)
@@ -1172,7 +1215,7 @@ exports.calc = function (req, res) {
                                 await As(company[0]._id, y, ruleValue)
 
                             }
-                        }, 1800)
+                        }, 2900)
 
                     }
                 })

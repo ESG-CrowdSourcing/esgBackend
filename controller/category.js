@@ -109,7 +109,6 @@ exports.companyTitle = (titleData) => {
 exports.fileUploadCategory = (caragoryData) => {
     return new Promise(async (resolve, reject) => {
         categorySchema.find({ category: caragoryData['Category'] }).exec().then(data => {
-            console.log(caragoryData)
             if (data.length >= 1) {
                 resolve(data[0])
             }
@@ -189,6 +188,7 @@ exports.fileUploadData = (caragoryData) => {
                 keyIssuesID: keyData._id,
                 DPCode: caragoryData['DP Code'],
                 dataCollection: caragoryData['Data Collection'],
+                functions :caragoryData['Function'],
                 DPName: caragoryData['DP Name'],
                 description: caragoryData['Description'],
                 unit: caragoryData['Unit'],
@@ -361,7 +361,6 @@ exports.getDirectors = (company, key, value) => {
             resolve(0)
         }
         else {
-            console.log(company, key, value)
 
             let dirSche = await dirSchema.find({ companyID: company._id, fiscalYear: value['Fiscal Year'] }).exec()
             if (dirSche.length > 0) {
@@ -392,7 +391,6 @@ exports.getDirectors = (company, key, value) => {
                     let direct = await f(key);
                     let Arr = await direct.filter(e => String(e).trim());
                     if (Arr.length > 0) {
-                        console.log(",,,,,,,,,,,,,,,,,,,", Arr)
                         const dataSche = new dirSchema({
                             _id: new mongoose.Types.ObjectId(),
                             companyID: company._id,
