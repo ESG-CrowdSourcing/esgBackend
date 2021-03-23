@@ -78,9 +78,7 @@ async function negative(dp, companyData, y, values, response, stdDev) {
             var avg = await average(dp, companyData, y, values);
 
             let negativeValue = (avg - response) / stdDev
-            if(dp == 'BOCR006' && companyData == '605599e2bce4a42fe4de6b62'){
-                console.log( " company : " , companyData , " year : " , y , "Dpcode "  , dp ,  " ARRRRRRRRRRRR  " , values , "Response : " ,response ,"Average  :  " ,avg, " stdDEv :  " , stdDev , " negativeValuw : " ,negativeValue)
-            }
+            
             resolve(negativeValue)
         }
     })
@@ -100,7 +98,6 @@ exports.percentile = function (req, res) {
 
         try {
             var NIC = req.params.NIC
-            console.log(isNaN(NaN))
 
             let Nic_code = await company.find({ companyName: NIC }).distinct('NIC_Code').exec()
             let companyName = await company.find({ NIC_Code: Nic_code[0] }).distinct('_id').exec()
@@ -186,9 +183,7 @@ function percentileCalc(value, dp, companyData, y) {
                 let ztValues = zt[0].values;
                 let ztl = ztValues[v]
                 percentile = ztl * 100
-                if(dp == 'BOCR006' && companyData == '605599e2bce4a42fe4de6b62'){
-                    console.log( " company : " , companyData , " year : " , y , "Dpcode "  , dp ,  " ARRRRRRRRRRRR  " , value , " percentile : " ,percentile)
-                }
+               
                 let responseValue = { $set: { performance: percentile } }
                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
             }

@@ -44,7 +44,6 @@ async function file(company, derviedValues, fiscal, matrix) {
 async function compare(arr1, arr2) {
     return new Promise(async (resolve, reject) => {
         var res = arr1.filter(x => !arr2.includes(x));
-         console.log('dddddddddddddddddddd ' , res)
         resolve(res);
     })
 
@@ -52,7 +51,6 @@ async function compare(arr1, arr2) {
 exports.getAllData = (company) => {
     var yearValues = [], yearData = {};
     return new Promise(async (resolve, reject) => {
-        console.log ("<<<<<<<<<<", Number(33.33) >= Number(33.33))
         // let data=await dataSchema.find({keyIssuesID:keyIssues._id}).exec()
         let year = await dataSchema.find({ companyName: company }).distinct('fiscalYear')
         for (let yr = 0; yr < year.length; yr++) {
