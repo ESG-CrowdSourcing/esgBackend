@@ -8,11 +8,11 @@ var clientData = require('../model/modelData');
 exports.companyDetails = async function (req, res) {
 
     try {
-let companyName ;
+        let companyName;
         for (let f = 0; f < req.files.length; f++) {
             let standardData = await multipleFileuploadController.sheetOne(req.files[f].path);
             let company = await category.companyTitle(standardData.companyArr[0]);
-             companyName = company._id
+            companyName = company._id
             for (let i = 0; i < standardData.resultArr.length; i++) {
                 for (let j = 0; j < standardData.resultArr[i].length; j++) {
                     if (standardData.resultArr[i][j].Category == undefined) {
@@ -27,16 +27,17 @@ let companyName ;
 
 
         let missedDP = await compare(companyName);
-   setTimeout( function() { 
-                        values(missedDP)}, 100);
-                       
-                        function values(missedDP){
-                            return res.status(200).json({
-                                message: 'file upload has been completed.',
-                                missedDPCodes: missedDP,
-                                status: 200,
-                            });
-                        }
+        setTimeout(function () {
+            values(missedDP)
+        }, 100);
+
+        function values(missedDP) {
+            return res.status(200).json({
+                message: 'file upload has been completed.',
+                missedDPCodes: missedDP,
+                status: 200,
+            });
+        }
 
 
     } catch (error) {
@@ -50,21 +51,21 @@ let companyName ;
 
 async function compare(companyName) {
     return new Promise(async (resolve, reject) => {
-        let dpCodes = await data.find({ dataCollection: 'Yes' , relevantForIndia:'Yes' , function:{ "$ne": 'Negative News'} }).distinct('DPCode').exec()
+        let dpCodes = await data.find({ dataCollection: 'Yes', relevantForIndia: 'Yes', function: { "$ne": 'Negative News' } }).distinct('DPCode').exec()
 
         let yearData = [], yearValue = {}
 
         let year = await clientData.find({ companyName: companyName }).distinct('fiscalYear').exec()
 
         year.forEach(async (y) => {
-           
-                let clientdp = await clientData.find({ companyName: companyName, fiscalYear: y }).distinct('DPCode').exec()
-                let missedExcel = await compareExcel(clientdp, dpCodes)
-                yearValue = {
-                    Year: y,
-                    MissedDPInExcel: missedExcel,
-                }
-                yearData.push(yearValue)           
+
+            let clientdp = await clientData.find({ companyName: companyName, fiscalYear: y }).distinct('DPCode').exec()
+            let missedExcel = await compareExcel(clientdp, dpCodes)
+            yearValue = {
+                Year: y,
+                MissedDPInExcel: missedExcel,
+            }
+            yearData.push(yearValue)
         })
         console.log(yearData)
 
