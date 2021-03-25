@@ -27,15 +27,17 @@ let companyName ;
 
 
         let missedDP = await compare(companyName);
-       setTimeout(async ()=>{
+   setTimeout( function() { 
+                        values(missedDP)}, 100);
+                       
+                        function values(missedDP){
+                            return res.status(200).json({
+                                message: 'file upload has been completed.',
+                                missedDPCodes: missedDP,
+                                status: 200,
+                            });
+                        }
 
-       
-        return res.status(200).json({
-            message: 'file upload has been completed.',
-            missedDPCodes: missedDP,
-            status: 200,
-        });
-         },1000)
 
     } catch (error) {
         return res.status(402).json({
