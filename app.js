@@ -5,7 +5,7 @@ var express = require('express'),
     mongoose.Promise = global.Promise; 
     mongoose.connect(
         'mongodb://localhost/taxonomy',
-        { useNewUrlParser: true }
+        { useNewUrlParser: true ,  useUnifiedTopology: true  }
     );
 var body_parser= require('body-parser');
 app.use(express.json());
