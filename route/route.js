@@ -6,14 +6,14 @@ var controversy= require('../controller/controversy')
 var calculation = require('../controller/Calculation');
 var percentile = require('../controller/percentile');
 const { get } = require('lodash');
-const path =require('path');
+var path =require('path');
 
 module.exports = function (app) {
 
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
            // cb(null, 'public/');
-             cb(null,path.join(__dirname,'../upload'));
+             cb(null,path.join(__dirname,'./upload'));
         },
         filename: (req, file, cb) => {
             cb(null, file.originalname);
