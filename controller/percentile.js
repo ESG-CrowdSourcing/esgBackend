@@ -347,6 +347,11 @@ async function resValue(NIC) {
                                     await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
                               
                                 }
+                                else if  (response[0] == 'NA' ){
+                                    let responseValue = { $set: { performance: 'NA' } }
+                                    await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
+                              
+                                }
                             }
                            else if (response[0] === 'Yes' || response[0] == 'yes') {
                                 if (polarityCheck[0] === 'Negative') {
