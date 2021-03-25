@@ -1,6 +1,6 @@
 var company = require('../model/companyTitle');
 var data = require('../model/dpCode');
-var clientData = require('../model/data');
+var clientData = require('../model/modelData');
 const { isNumber } = require('lodash');
 var ztable = require('../model/zTable')
 var zscoreCal = require('ztable');
@@ -142,7 +142,7 @@ exports.percentile = function (req, res) {
                 return res.status(200).json({
                     message: "percentile calculated",
                 })
-            }, 199900)
+            }, 19900)
 
 
         } catch (error) {
@@ -336,7 +336,19 @@ async function resValue(NIC) {
                         }
                         else {
                             let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
-                            if (response[0] === 'Yes' || response[0] == 'yes') {
+                            if(dp == 'BUSP008' || dp == 'BUSP009'){
+                                if (response[0] == 'No' ){
+                                    let responseValue = { $set: { performance: 'Positive' } }
+                                    await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
+                              
+                                }
+                                else if (response[0] == 'Yes' ){
+                                    let responseValue = { $set: { performance: 'Negative' } }
+                                    await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
+                              
+                                }
+                            }
+                           else if (response[0] === 'Yes' || response[0] == 'yes') {
                                 if (polarityCheck[0] === 'Negative') {
                                     let responseValue = { $set: { performance: 'No' } }
                                     await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()

@@ -1,4 +1,4 @@
-var subcriptionSchema = require('../model/subcription')
+var subcriptionSchema = require('../model/modelsubcription')
 var titleSchema = require('../model/companyTitle');
 var mongoose = require('mongoose')
 

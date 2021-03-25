@@ -1,4 +1,4 @@
-var themeSchema = require('../model/theme')
+var themeSchema = require('../model/modeltheme')
 var mongoose = require('mongoose')
 var keySchema = require('../model/key')
 

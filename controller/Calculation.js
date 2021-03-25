@@ -1,8 +1,8 @@
 'use strict';
-var clientData = require('../model/data')
+var clientData = require('../model/modelData')
 var companytitle = require('../model/companyTitle')
 var rule = require('../model/rule');
-const { updateOne } = require('../model/data');
+const { updateOne } = require('../model/modelData');
 const { response } = require('express');
 const { values } = require('lodash');
 var data = require('../model/dpCode')

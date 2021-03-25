@@ -1,5 +1,5 @@
 var category = require('../controller/category')
-var categorySchema = require('../model/category')
+var categorySchema = require('../model/modelCategory')
 var theameController = require('../controller/theme')
 var keyController = require('../controller/keyIssues')
 var dataController = require('../controller/data')
@@ -7,7 +7,7 @@ var multipleFileuploadController = require('../controller/multipleFileupload')
 var subcriptionController = require('../controller/subcription')
 
 var titleSchema = require('../model/companyTitle');
-var masterSchema = require('../model/masterTaxonomy')
+var masterSchema = require('../model/modelMaster')
 var packageSchema = require('../model/package')
 var mongoose = require('mongoose');
 var _ = require('lodash');

@@ -1,7 +1,7 @@
 var category = require('../controller/category')
 var multipleFileuploadController = require('../controller/multipleFileupload')
 var company = require('../model/companyTitle')
-var controversySchema = require('../model/controversy')
+var controversySchema = require('../model/modelcontroversy')
 exports.controversy = async function (req, res) {
 
     try {

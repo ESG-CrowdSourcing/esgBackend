@@ -1,4 +1,4 @@
-var dataSchema = require('../model/data')
+var dataSchema = require('../model/modelData')
 var mongoose = require('mongoose')
 var matrix = require('../model/dpCode')
 var dpSchema = require('../model/dpCode');

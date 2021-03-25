@@ -1,6 +1,6 @@
-var themeSchema = require('../model/theme')
+var themeSchema = require('../model/modeltheme')
 var mongoose = require('mongoose')
-var categorySchema = require('../model/category')
+var categorySchema = require('../model/modelCategory')
 
 exports.theme = function (req, res) {
     categorySchema.findOne({ category: req.body.category }).exec().then(data => {

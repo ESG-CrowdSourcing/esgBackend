@@ -1,10 +1,10 @@
-var categorySchema = require('../model/category')
-var themeSchema = require('../model/theme')
-var dataSchema = require('../model/data')
+var categorySchema = require('../model/modelCategory')
+var themeSchema = require('../model/modeltheme')
+var dataSchema = require('../model/modelData')
 var keySchema = require('../model/key')
 var mongoose = require('mongoose');
 const { response } = require('express');
-var masterSchema = require('../model/masterTaxonomy')
+var masterSchema = require('../model/modelMaster')
 var titleSchema = require('../model/companyTitle')
 var dpcodeSchema = require('../model/dpCode')
 var ruleSchema = require('../model/rule');
@@ -16,7 +16,7 @@ mongoose.Schema.Types.Boolean.convertToFalse.add('');
 var dataCollectionSchema = require('../model/dpCode');
 
 
-var controversySchema = require('../model/controversy')
+var controversySchema = require('../model/modelcontroversy')
 exports.masterTaxonomy = (masterData) => {
     return new Promise(async (resolve, reject) => {
         file
@@ -203,7 +203,6 @@ exports.fileUploadData = (caragoryData) => {
                 finalUnit: caragoryData['Final Unit'],
                 reference: caragoryData['Reference'],
                 industryRelevancy: caragoryData['Industry Relevancy']
-
             }).save().then(datad => {
                 resolve(datad);
             });

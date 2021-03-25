@@ -2,7 +2,7 @@
 var multipleFileuploadController = require('../controller/multipleFileupload')
 var category = require('../controller/category')
 var data = require('../model/dpCode');
-var clientData = require('../model/data');
+var clientData = require('../model/modelData');
 
 
 exports.companyDetails = async function (req, res) {
@@ -48,7 +48,7 @@ let companyName ;
 
 async function compare(companyName) {
     return new Promise(async (resolve, reject) => {
-        let dpCodes = await data.find({ dataCollection: 'Yes' , relevantForIndia:'Yes' }).distinct('DPCode').exec()
+        let dpCodes = await data.find({ dataCollection: 'Yes' , relevantForIndia:'Yes' , function:{ "$ne": 'Negative News'} }).distinct('DPCode').exec()
 
         let yearData = [], yearValue = {}
 
