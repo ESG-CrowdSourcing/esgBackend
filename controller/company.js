@@ -62,6 +62,7 @@ async function compare(companyName) {
             let clientdp = await clientData.find({ companyName: companyName, fiscalYear: y }).distinct('DPCode').exec()
             let missedExcel = await compareExcel(clientdp, dpCodes)
             yearValue = {
+                CompanyName:companyName,
                 Year: y,
                 MissedDPInExcel: missedExcel,
             }
