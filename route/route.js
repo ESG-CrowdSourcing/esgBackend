@@ -6,11 +6,14 @@ var controversy= require('../controller/controversy')
 var calculation = require('../controller/Calculation');
 var percentile = require('../controller/percentile');
 const { get } = require('lodash');
+var path =require('path');
+
 module.exports = function (app) {
 
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, 'public/');
+          //  cb(null, 'public/');
+             cb(null,path.join(__dirname,'../uploads'));
         },
         filename: (req, file, cb) => {
             cb(null, file.originalname);
@@ -19,7 +22,7 @@ module.exports = function (app) {
     var xslx = multer({ storage: storage });
 
     app.route('/master').post(xslx.single('file'),master.masterTaxonomy);
-    app.route('/taxonomy').post(xslx.array('file', 25), cmpany.companyDetails);
+    app.route('/taxonomy').post(xslx.array('file', 10), cmpany.companyDetails);
    // app.route('/controversy').post(xslx.array('file',2),controversy.controversy);
     app.route('/rule').post(xslx.single('file'),cmpany.rule);
     app.route('/calculation/:companyName').post(calculation.calc)
