@@ -10,7 +10,7 @@ var express = require('express'),
 var body_parser= require('body-parser');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// app.use(express.static("public"))
+app.use(express.static(__dirname + '/uploads'))
 // CORS
 app.use(function(req, res, next) {
     /* res.header("Access-Control-Allow-Origin", "*");
