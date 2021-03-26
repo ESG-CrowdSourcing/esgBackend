@@ -3,19 +3,15 @@ var themeSchema = require('../model/modeltheme')
 var dataSchema = require('../model/modelData')
 var keySchema = require('../model/key')
 var mongoose = require('mongoose');
-const { response } = require('express');
 var masterSchema = require('../model/modelMaster')
 var titleSchema = require('../model/companyTitle')
 var dpcodeSchema = require('../model/dpCode')
 var ruleSchema = require('../model/rule');
-const dpCode = require('../model/dpCode');
 var ztableSchema = require('../model/zTable');
 var polaritySchema = require('../model/polarity')
 var dirSchema = require('../model/dir')
 mongoose.Schema.Types.Boolean.convertToFalse.add('');
 var dataCollectionSchema = require('../model/dpCode');
-
-
 var controversySchema = require('../model/modelcontroversy')
 exports.masterTaxonomy = (masterData) => {
     return new Promise(async (resolve, reject) => {

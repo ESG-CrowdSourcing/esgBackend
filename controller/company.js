@@ -3,16 +3,17 @@ var multipleFileuploadController = require('../controller/multipleFileupload')
 var category = require('../controller/category')
 var data = require('../model/dpCode');
 var clientData = require('../model/modelData');
+var companyTitle = require('../model/companyTitle');
 
 
 exports.companyDetails = async function (req, res) {
 
     try {
         let companyName;
+        let missedDP
         for (let f = 0; f < req.files.length; f++) {
             let standardData = await multipleFileuploadController.sheetOne(req.files[f].path);
             let company = await category.companyTitle(standardData.companyArr[0]);
-            companyName = company._id
             for (let i = 0; i < standardData.resultArr.length; i++) {
                 for (let j = 0; j < standardData.resultArr[i].length; j++) {
                     if (standardData.resultArr[i][j].Category == undefined) {
@@ -23,21 +24,22 @@ exports.companyDetails = async function (req, res) {
                     }
                 }
             }
+             missedDP = await compare(company._id);
+
         }
 
 
-        let missedDP = await compare(companyName);
-        setTimeout(function () {
-            values(missedDP)
-        }, 100);
+        // setTimeout(function () {
+        //     values(missedDP)
+        // }, 100);
 
-        function values(missedDP) {
+        // function values(missedDP) {
             return res.status(200).json({
                 message: 'file upload has been completed.',
                 missedDPCodes: missedDP,
                 status: 200,
             });
-        }
+        // }
 
 
     } catch (error) {
@@ -54,6 +56,7 @@ async function compare(companyName) {
         let dpCodes = await data.find({ dataCollection: 'Yes', relevantForIndia: 'Yes', functions: { "$ne": 'Negative News' } }).distinct('DPCode').exec()
 
         let yearData = [], yearValue = {}
+    let companyData=  await companyTitle.find({_id : companyName}).distinct('companyName').exec()
 
         let year = await clientData.find({ companyName: companyName }).distinct('fiscalYear').exec()
 
@@ -62,7 +65,7 @@ async function compare(companyName) {
             let clientdp = await clientData.find({ companyName: companyName, fiscalYear: y }).distinct('DPCode').exec()
             let missedExcel = await compareExcel(clientdp, dpCodes)
             yearValue = {
-                CompanyName:companyName,
+                CompanyName:companyData[0],
                 Year: y,
                 MissedDPInExcel: missedExcel,
             }
