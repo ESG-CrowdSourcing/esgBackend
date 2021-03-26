@@ -51,7 +51,7 @@ exports.companyDetails = async function (req, res) {
 
 async function compare(companyName) {
     return new Promise(async (resolve, reject) => {
-        let dpCodes = await data.find({ dataCollection: 'Yes', relevantForIndia: 'Yes', function: { "$ne": 'Negative News' } }).distinct('DPCode').exec()
+        let dpCodes = await data.find({ dataCollection: 'Yes', relevantForIndia: 'Yes', functions: { "$ne": 'Negative News' } }).distinct('DPCode').exec()
 
         let yearData = [], yearValue = {}
 
