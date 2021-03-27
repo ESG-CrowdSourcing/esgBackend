@@ -142,7 +142,7 @@ exports.percentile = function (req, res) {
                 return res.status(200).json({
                     message: "percentile calculated",
                 })
-            }, 19900)
+            }, 99500)
 
 
         } catch (error) {
