@@ -1113,7 +1113,7 @@ exports.calc = function (req, res) {
                             await sumMethod(company[0]._id, y, numparams[0], ruleValue[0].DPCode);
                         }
                         else if (value == 'MACR002' || value == 'MACR007' || value == 'MACR010') {
-                            await Ratio(company, y, ruleValue, value)
+                            await Ratio(company[0]._id, y, ruleValue, value)
 
                         }
 
@@ -1121,16 +1121,15 @@ exports.calc = function (req, res) {
 
                             await Minus(ruleValue, company[0]._id, y, value)
                         }
-                        setTimeout(async () => {
-
+                        setTimeout(async () => {                            
 
                             if (ruleValue[0].methodName == 'Ratio') {
 
-                                await Ratio(company, y, ruleValue, value)
+                                await Ratio(company[0]._id, y, ruleValue, value)
 
                             }
                             else if (ruleValue[0].methodName == 'RatioADD') {
-                                await RatioADD(company, y, ruleValue, value)
+                                await RatioADD(company[0]._id, y, ruleValue, value)
 
                             }
 
@@ -1139,7 +1138,7 @@ exports.calc = function (req, res) {
                             }
                             else if (ruleValue[0].methodName == 'Percentage') {
 
-                                await PercentageValue(company, y, value, ruleValue)
+                                await PercentageValue(company[0]._id, y, value, ruleValue)
                             }
 
                             else if (ruleValue[0].methodName == 'ADD') {
@@ -1222,9 +1221,10 @@ exports.calc = function (req, res) {
 
 
             })
-            return res.status(200).json({
-                message: "response updated",
-            })
+                return res.status(200).json({
+                    message: "response updated",
+                })
+          
 
         } catch (error) {
             return res.status(405).json({
