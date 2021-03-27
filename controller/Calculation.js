@@ -16,7 +16,7 @@ async function comma(value) {
     return new Promise(async (resolve, reject) => {
         if (typeof (value) == 'string') {
             if (value.includes(',')) {
-                var resolvedValue = value.replace(/,/g, '');
+                var resolvedValue = value.replace(/,/g, '').trim();
 
                 resolve(resolvedValue)
             }
@@ -40,7 +40,7 @@ async function arrComma(arr) {
 
             if (typeof (value) == 'string') {
                 if (value.includes(',')) {
-                    var resolvedValue = value.replace(/,/g, '');
+                    var resolvedValue = value.replace(/,/g, '').trim();
 
                     data.push(resolvedValue)
                 }
