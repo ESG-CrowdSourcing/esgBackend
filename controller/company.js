@@ -29,17 +29,17 @@ exports.companyDetails = async function (req, res) {
         }
 
 
-        // setTimeout(function () {
-        //     values(missedDP)
-        // }, 100);
+        setTimeout(function () {
+            values(missedDP)
+        }, 100);
 
-        // function values(missedDP) {
+        function values(missedDP) {
             return res.status(200).json({
                 message: 'file upload has been completed.',
                 missedDPCodes: missedDP,
                 status: 200,
             });
-        // }
+         }
 
 
     } catch (error) {
