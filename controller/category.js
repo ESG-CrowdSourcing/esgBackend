@@ -206,29 +206,29 @@ exports.fileUploadData = (caragoryData) => {
     });
 }
 
-// exports.logic = (caragoryData) => {
-//     return new Promise(async (resolve, reject) => {
-//         let rule = await ruleSchema.find({ DPCode: caragoryData['DP Code'] }).exec()
-//         if (rule.length > 1) {
-//             resolve(rule[0])
-//         }
-//         else {
-//             const data = new ruleSchema({
-//                 _id: new mongoose.Types.ObjectId(),
-//                 ruleID: caragoryData['Rule ID'],
-//                 DPCode: caragoryData['DP Code'],
-//                 aidDPLogic: caragoryData['Aid DP/Logic'],
-//                 methodName: caragoryData['Method Name'],
-//                 methodType: caragoryData['Method Type'],
-//                 criteria: caragoryData['Criteria'],
-//                 parameter: caragoryData['Parameter']
+exports.logic = (caragoryData) => {
+    return new Promise(async (resolve, reject) => {
+        let rule = await ruleSchema.find({ DPCode: caragoryData['DP Code'] }).exec()
+        if (rule.length > 1) {
+            resolve(rule[0])
+        }
+        else {
+            const data = new ruleSchema({
+                _id: new mongoose.Types.ObjectId(),
+                ruleID: caragoryData['Rule ID'],
+                DPCode: caragoryData['DP Code'],
+                aidDPLogic: caragoryData['Aid DP/Logic'],
+                methodName: caragoryData['Method Name'],
+                methodType: caragoryData['Method Type'],
+                criteria: caragoryData['Criteria'],
+                parameter: caragoryData['Parameter']
 
-//             }).save().then(datad => {
-//                 resolve(datad);
-//             });
-//         }
-//     })
-// }
+            }).save().then(datad => {
+                resolve(datad);
+            });
+        }
+    })
+}
 
 exports.polarity = (caragoryData) => {
     return new Promise(async (resolve, reject) => {
