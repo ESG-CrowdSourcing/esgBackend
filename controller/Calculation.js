@@ -892,6 +892,7 @@ async function AsPercentage(company, year, ruleValue, value) {
 }
 async function Ratio(company, y, ruleValue, value) {
     return new Promise(async (resolve, reject) => {
+
         let param = ruleValue[0].parameter.split(',')
         let checknum = await rule.find({ DPCode: param[0] }).exec();
         let checkDen = await rule.find({ DPCode: param[1] }).exec();
@@ -1092,7 +1093,7 @@ async function derivedCalc(companyName) {
         
         let company = await companytitle.find({ companyName: companyName }).exec()
         let year = await clientData.find({ companyName: company[0]._id }).distinct('fiscalYear').exec()
-
+console.log( " ......... " ,companyName)
         year.forEach(async (y) => {
             let datadp = await data.find({}).distinct('DPCode').exec();
             datadp.forEach(async (value) => {

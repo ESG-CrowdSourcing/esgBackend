@@ -13,9 +13,6 @@ exports.masterTaxonomy= async function (req,res){
                 if(keyIssue.keyIssues)
                 {
                     let dpcode = await category.fileUploadData(standardData[i])
-                    if(dpcode.DPCode){
-                        let logic = await category.logic(standardData[i])
-                    }
                 }
             }
         }
