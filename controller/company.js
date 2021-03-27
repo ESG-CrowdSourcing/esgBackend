@@ -53,7 +53,7 @@ exports.companyDetails = async function (req, res) {
 
 async function compare(companyName) {
     return new Promise(async (resolve, reject) => {
-        let dpCodes = await data.find({ dataCollection: 'Yes', relevantForIndia: 'Yes', functions: { "$ne": 'Negative News' } }).distinct('DPCode').exec()
+        let dpCodes = await data.find({ dataCollection: 'Yes', functions: { "$ne": 'Negative News' } }).distinct('DPCode').exec()
 
         let yearData = [], yearValue = {}
     let companyData=  await companyTitle.find({_id : companyName}).distinct('companyName').exec()
@@ -115,7 +115,7 @@ exports.Ztable = async function (req, res) {
             let c = await category.Zscore(standardData[i]);
         }
         return res.status(200).json({
-            message: ' percentile file upload has been completed.',
+            message: 'percentile file upload has been completed.',
             status: 200,
         });
 

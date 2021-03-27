@@ -1097,7 +1097,7 @@ exports.calc = function (req, res) {
 
                 // let dpcode = await clientData.find({ companyName: company[0]._id, fiscalYear:y }).distinct('DPCode').exec()
                 //    let dpcode = await data.find({}).distinct('DPCode').exec();
-                let datadp = await data.find({ dataCollection: 'No' }).distinct('DPCode').exec();
+                let datadp = await data.find({ }).distinct('DPCode').exec();
                 // let dpvalue = await compare(dpcode, ruledp)
                 datadp.forEach(async (value) => {
                     let ruleValue = await rule.find({ DPCode: value }).exec()
