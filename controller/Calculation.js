@@ -732,6 +732,104 @@ async function Minus(ruleValue, company, year, value) {
     })
 }
 
+async function dividearr(arr1, arr2) {
+    return new Promise(async (resolve, reject) => {
+
+        let directors = []
+
+        for (let i = 0; i < arr1.length; i++) {
+            let dir = await percent(arr1[i], arr2[i])
+            directors.push(dir)
+        }
+        resolve(directors)
+
+    })
+
+}
+
+async function divideValue(arr1, value) {
+    return new Promise(async (resolve, reject) => {
+
+        let directors = []
+
+        for (let i = 0; i < arr1.length; i++) {
+            let dir = await percent(arr1[i], value)
+            directors.push(dir)
+        }
+        resolve(directors)
+
+    })
+
+}
+
+async function matrixPercentage(company, year, value, ruleValue) {
+    return new Promise(async (resolve, reject) => {
+        if (ruleValue[0].methodType == 'composite') {
+
+            let params = ruleValue[0].parameter.split(',')
+            let num = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[0] }).exec();
+            let Den = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[1] }).exec();
+
+            let arrNum = num[0].directors;
+            let arrDen = Den[0].directors;
+
+            let directors = await dividearr(arrNum, arrDen)
+
+            let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
+            if (dpCheck.length == 0) {
+                const category = new clientData({
+                    _id: new mongoose.Types.ObjectId(),
+                    companyName: company,
+                    fiscalYear: year,
+                    DPCode: value,
+                    directors: directors,
+                    performance: ''
+                }).save()
+                resolve('success')
+
+            }
+            else {
+                let update = { $set: { directors: directors } }
+                await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+                resolve('success')
+            }
+        }
+        else {
+            let params = ruleValue[0].parameter.split(',')
+            let num = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[0] }).exec();
+            let Den = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[1] }).exec();
+
+            let arrNum = num[0].directors;
+
+            let directors = await divideValue(arrNum, Den[0].response)
+
+            let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
+            if (dpCheck.length == 0) {
+                const category = new clientData({
+                    _id: new mongoose.Types.ObjectId(),
+                    companyName: company,
+                    fiscalYear: year,
+                    DPCode: value,
+                    directors: directors,
+                    performance: ''
+                }).save()
+                resolve('success')
+
+            }
+            else {
+                let update = { $set: { directors: directors } }
+                await clientData.updateOne({ companyName: company, fiscalYear: year, DPCode: value }, update).exec();
+                resolve('success')
+
+            }
+
+
+        }
+
+
+    })
+}
+
 async function ADD(company, year, ruleValue) {
     return new Promise(async (resolve, reject) => {
         let res = await clientData.find({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }).exec();
@@ -1048,6 +1146,73 @@ async function RatioADD(company, y, ruleValue, value) {
         }
     })
 }
+async function YesNoValue(company, y, numpara) {
+    return new Promise(async (resolve, reject) => {
+        let C = 0;
+        for (let i = 0; i < numpara.length; i++) {
+            let num = await clientData.find({ companyName: company, fiscalYear: y, DPCode: numpara[i] }).distinct('response').exec();
+            if (num[0].trim() == 'Yes' || num[0] == 'Y') {
+                C++;
+            }
+
+        }
+        resolve(C)
+    })
+}
+async function YesNO(company, y, value, ruleValue) {
+    return new Promise(async (resolve, reject) => {
+        let numpara = ruleValue[0].parameter.split(',')
+        let count = await YesNoValue(company, y, numpara)
+        if (count > 0) {
+
+            let dpCheck = await clientData.find({ companyName: company, fiscalYear: y, DPCode: value }).exec();
+            if (dpCheck.length == 0) {
+                const category = new clientData({
+                    _id: new mongoose.Types.ObjectId(),
+                    companyName: company,
+                    fiscalYear: y,
+                    DPCode: value,
+                    response: 'Yes',
+                    performance: ''
+                }).save()
+                resolve('updated')
+            }
+            else {
+
+                let update = { $set: { response: 'Yes' } }
+                await clientData.updateOne({ companyName: company, fiscalYear: y, DPCode: value }, update).exec();
+                resolve('updated')
+
+            }
+        }
+        else {
+
+            let dpCheck = await clientData.find({ companyName: company, fiscalYear: y, DPCode: value }).exec();
+
+            if (dpCheck.length == 0) {
+                const category = new clientData({
+                    _id: new mongoose.Types.ObjectId(),
+                    companyName: company,
+                    fiscalYear: y,
+                    DPCode: value,
+                    response: 'No',
+                    performance: ''
+                }).save()
+                resolve('success')
+
+
+            }
+            else {
+                let update = { $set: { response: 'No' } }
+                await clientData.updateOne({ companyName: company, fiscalYear: y, DPCode: value }, update).exec();
+                resolve('success')
+
+            }
+        }
+
+    })
+
+}
 async function PercentageValue(company, y, value, ruleValue) {
     return new Promise(async (resolve, reject) => {
         if (ruleValue[0].methodType == 'sum,sum') {
@@ -1090,10 +1255,10 @@ async function PercentageValue(company, y, value, ruleValue) {
 }
 async function derivedCalc(companyName) {
     return new Promise(async (resolve, reject) => {
-        
+
         let company = await companytitle.find({ companyName: companyName }).exec()
         let year = await clientData.find({ companyName: company[0]._id }).distinct('fiscalYear').exec()
-console.log( " ......... " ,companyName)
+
         year.forEach(async (y) => {
             let datadp = await data.find({}).distinct('DPCode').exec();
             datadp.forEach(async (value) => {
@@ -1109,6 +1274,11 @@ console.log( " ......... " ,companyName)
                     else if (ruleValue[0].methodName == 'RatioADD') {
                         await RatioADD(company, y, ruleValue, value)
 
+                    }
+
+                    else if (ruleValue[0].methodName == 'YesNo') {
+
+                        let s = await YesNO(company[0]._id, y, value, ruleValue)
                     }
 
                     else if (ruleValue[0].methodName == 'AsPercentage') {
@@ -1233,18 +1403,22 @@ exports.calc = function (req, res) {
 
                             await Minus(ruleValue, company[0]._id, y, value)
                         }
+                        else if (ruleValue[0].methodName == 'MatrixPercentage') {
+
+                            await matrixPercentage(company[0]._id, y, value, ruleValue)
+                        }
                     }
                 })
 
             })
-            setTimeout(async ()=>{
-           
-            await derivedCalc(req.params.companyName)
+            setTimeout(async () => {
 
-            return res.status(200).json({
-                message: "response updated",
-            })
-        },2000)
+                await derivedCalc(req.params.companyName)
+
+                return res.status(200).json({
+                    message: "response updated",
+                })
+            }, 2000)
 
         } catch (error) {
             return res.status(405).json({
