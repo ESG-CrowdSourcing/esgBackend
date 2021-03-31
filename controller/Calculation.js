@@ -1418,7 +1418,7 @@ exports.calc = function (req, res) {
                 return res.status(200).json({
                     message: "response updated",
                 })
-            }, 2000)
+            }, 2800)
 
         } catch (error) {
             return res.status(405).json({

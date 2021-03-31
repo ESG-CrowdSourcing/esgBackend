@@ -13,6 +13,8 @@ var dirSchema = require('../model/dir')
 mongoose.Schema.Types.Boolean.convertToFalse.add('');
 var dataCollectionSchema = require('../model/dpCode');
 var controversySchema = require('../model/modelcontroversy')
+var clientData = require('../model/modelData')
+
 exports.masterTaxonomy = (masterData) => {
     return new Promise(async (resolve, reject) => {
         file
@@ -184,7 +186,7 @@ exports.fileUploadData = (caragoryData) => {
                 keyIssuesID: keyData._id,
                 DPCode: caragoryData['DP Code'],
                 dataCollection: caragoryData['Data Collection'],
-                functions :caragoryData['Function'],
+                functions: caragoryData['Function'],
                 DPName: caragoryData['DP Name'],
                 description: caragoryData['Description'],
                 unit: caragoryData['Unit'],
@@ -288,6 +290,27 @@ exports.fileUploadMaster = (dir, company, caragoryData) => {
         if (dataCollection.includes(caragoryData['DP Code']) || caragoryData['DP Code'] == 'Category') {
             if (dir.length == 0) {
                 if (data.length > 1) {
+                    let update = {
+                        $set: {
+                            companyName: company._id,
+                            DPCode: caragoryData['DP Code'],
+                            DPType: caragoryData['Data Type'],
+                            description: caragoryData['Description'],
+                            unit: caragoryData['Unit'],
+                            fiscalYear: caragoryData['Fiscal Year'],
+                            indicator: caragoryData['Indicator'],
+                            fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                            response: caragoryData['Response'],
+                            sourceName: caragoryData['Source name'],
+                            sourceURL: caragoryData['URL'],
+                            sourcePublicationDate: caragoryData['Publication date'],
+                            pageNumber: caragoryData['Page number'],
+                            snapshot: caragoryData['Text snippet'],
+                            comments: caragoryData['Comments/Calculations']
+                        }
+                    }
+
+                    await clientData.updateOne({ companyName: company._id, fiscalYear: caragoryData['Fiscal Year'], DPCode: caragoryData['DP Code'] }, update).exec();
                     resolve(data[0])
                 }
                 else {
@@ -314,11 +337,34 @@ exports.fileUploadMaster = (dir, company, caragoryData) => {
                 }
             }
             else {
+                let directors = await director(dir, caragoryData);
+
                 if (data.length > 1) {
+                    let update = {
+                        $set: {
+                            companyName: company._id,
+                            DPCode: caragoryData['DP Code'],
+                            DPType: caragoryData['Data Type'],
+                            description: caragoryData['Description'],
+                            unit: caragoryData['Unit'],
+                            fiscalYear: caragoryData['Fiscal Year'],
+                            indicator: caragoryData['Indicator'],
+                            fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                            response: caragoryData['Response'],
+                            sourceName: caragoryData['Source name'],
+                            sourceURL: caragoryData['URL'],
+                            sourcePublicationDate: caragoryData['Publication date'],
+                            pageNumber: caragoryData['Page number'],
+                            snapshot: caragoryData['Text snippet'],
+                            comments: caragoryData['Comments/Calculations'], directors: directors
+                        }
+                    }
+
+                    await clientData.updateOne({ companyName: company._id, fiscalYear: caragoryData['Fiscal Year'], DPCode: caragoryData['DP Code'] }, update).exec();
+
                     resolve(data[0])
                 }
                 else {
-                    let directors = await director(dir, caragoryData);
 
                     const dataSche = new dataSchema({
                         _id: new mongoose.Types.ObjectId(),
