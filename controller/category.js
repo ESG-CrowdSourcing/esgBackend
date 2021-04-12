@@ -10,9 +10,13 @@ var ruleSchema = require('../model/rule');
 var ztableSchema = require('../model/zTable');
 var polaritySchema = require('../model/polarity')
 var dirSchema = require('../model/dir')
+var clientData = require('../model/modelData')
+var matrixData = require('../model/matrixData')
+
 mongoose.Schema.Types.Boolean.convertToFalse.add('');
 var dataCollectionSchema = require('../model/dpCode');
-var controversySchema = require('../model/modelcontroversy')
+var controversySchema = require('../model/modelcontroversy');
+const { resolve } = require('path');
 exports.masterTaxonomy = (masterData) => {
     return new Promise(async (resolve, reject) => {
         file
@@ -270,13 +274,40 @@ exports.Zscore = (caragoryData) => {
         });
     })
 }
-async function director(dir, caragoryData) {
-    var directors = []
-    dir.forEach(element => {
-        directors.push(caragoryData[element])
-    });
+async function director(dir, company ,caragoryData) {
+    return new Promise(async (resolve, reject) => {
 
-    return directors
+        dir.forEach(async (element) =>{
+            let data = await matrixData.find({ companyName: company._id, DPCode: caragoryData['DP Code'] , fiscalYear :caragoryData['Fiscal Year'] , dirName:element}).exec()
+
+            if(data.length > 0){
+                let update = { $set: {  
+                    companyName: company._id,
+                    DPCode: caragoryData['DP Code'],
+                   fiscalYear: caragoryData['Fiscal Year'], 
+                   fiscalYearEnddate: caragoryData['Fiscal Year End Date'],             
+                   value: caragoryData[element],
+                   dirName : element,
+                   isActive :'true'}}
+                   await matrixData.updateOne({ companyName: company._id, fiscalYear: caragoryData['Fiscal Year'], DPCode: caragoryData['DP Code'] ,dirName : element }, update).exec();
+            }
+            else{
+                const matrixdata = new matrixData ({
+                   _id: new mongoose.Types.ObjectId(),
+                   companyName: company._id,
+                   DPCode: caragoryData['DP Code'],
+                   fiscalYear: caragoryData['Fiscal Year'],  
+                   fiscalYearEnddate: caragoryData['Fiscal Year End Date'],           
+                   value: caragoryData[element],
+                   dirName : element,
+                   isActive :'true'
+               }).save()
+   
+            }
+        })    
+        resolve('success')   
+
+    })
 }
 
 
@@ -288,6 +319,25 @@ exports.fileUploadMaster = (dir, company, caragoryData) => {
         if (dataCollection.includes(caragoryData['DP Code']) || caragoryData['DP Code'] == 'Category') {
             if (dir.length == 0) {
                 if (data.length > 1) {
+                    let update = { $set: {  companyName: company._id,
+                        DPCode: caragoryData['DP Code'],
+                        DPType: caragoryData['Data Type'],
+                        description: caragoryData['Description'],
+                        unit: caragoryData['Unit'],
+                        fiscalYear: caragoryData['Fiscal Year'],
+                        indicator: caragoryData['Indicator'],
+                        fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                        response: caragoryData['Response'],
+                        sourceName: caragoryData['Source name'],
+                        sourceURL: caragoryData['URL'],
+                        sourcePublicationDate: caragoryData['Publication date'],
+                        pageNumber: caragoryData['Page number'],
+                        snapshot: caragoryData['Text snippet'],
+                        comments: caragoryData['Comments/Calculations'] } }
+
+                        await clientData.updateOne({ companyName: company._id, fiscalYear: caragoryData['Fiscal Year'], DPCode: caragoryData['DP Code'] }, update).exec();
+
+
                     resolve(data[0])
                 }
                 else {
@@ -314,34 +364,55 @@ exports.fileUploadMaster = (dir, company, caragoryData) => {
                 }
             }
             else {
-                if (data.length > 1) {
-                    resolve(data[0])
-                }
-                else {
-                    let directors = await director(dir, caragoryData);
+                await director(dir,company ,caragoryData);
+                resolve(data[0])
 
-                    const dataSche = new dataSchema({
-                        _id: new mongoose.Types.ObjectId(),
-                        companyName: company._id,
-                        DPCode: caragoryData['DP Code'],
-                        DPType: caragoryData['Data Type'],
-                        description: caragoryData['Description'],
-                        unit: caragoryData['Unit'],
-                        fiscalYear: caragoryData['Fiscal Year'],
-                        indicator: caragoryData['Indicator'],
-                        fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
-                        response: caragoryData['Response'],
-                        sourceName: caragoryData['Source name'],
-                        sourceURL: caragoryData['URL'],
-                        sourcePublicationDate: caragoryData['Publication date'],
-                        pageNumber: caragoryData['Page number'],
-                        snapshot: caragoryData['Text snippet'],
-                        comments: caragoryData['Comments/Calculations'],
-                        directors: directors
-                    }).save().then(themed => {
-                        resolve(themed);
-                    });
-                }
+                // if (data.length > 1) {
+                //     let update = { $set: {  companyName: company._id,
+                //         DPCode: caragoryData['DP Code'],
+                //         DPType: caragoryData['Data Type'],
+                //         description: caragoryData['Description'],
+                //         unit: caragoryData['Unit'],
+                //         fiscalYear: caragoryData['Fiscal Year'],
+                //         indicator: caragoryData['Indicator'],
+                //         fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                //         response: caragoryData['Response'],
+                //         sourceName: caragoryData['Source name'],
+                //         sourceURL: caragoryData['URL'],
+                //         sourcePublicationDate: caragoryData['Publication date'],
+                //         pageNumber: caragoryData['Page number'],
+                //         snapshot: caragoryData['Text snippet'],
+                //         comments: caragoryData['Comments/Calculations'] 
+                //     } }
+
+                //         await clientData.updateOne({ companyName: company._id, fiscalYear: caragoryData['Fiscal Year'], DPCode: caragoryData['DP Code'] }, update).exec();
+
+                //     resolve(data[0])
+                // }
+                // else {
+
+                //     const dataSche = new dataSchema({
+                //         _id: new mongoose.Types.ObjectId(),
+                //         companyName: company._id,
+                //         DPCode: caragoryData['DP Code'],
+                //         DPType: caragoryData['Data Type'],
+                //         description: caragoryData['Description'],
+                //         unit: caragoryData['Unit'],
+                //         fiscalYear: caragoryData['Fiscal Year'],
+                //         indicator: caragoryData['Indicator'],
+                //         fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                //         response: caragoryData['Response'],
+                //         sourceName: caragoryData['Source name'],
+                //         sourceURL: caragoryData['URL'],
+                //         sourcePublicationDate: caragoryData['Publication date'],
+                //         pageNumber: caragoryData['Page number'],
+                //         snapshot: caragoryData['Text snippet'],
+                //         comments: caragoryData['Comments/Calculations'],
+                        
+                //     }).save().then(themed => {
+                //         resolve(themed);
+                //     });
+                // }
             }
         }
         else {
@@ -472,19 +543,24 @@ exports.getNewAllCategory = (companyData) => {
 
 
 async function f(keyName) {
+    return new Promise(async (resolve, reject) => {
 
     var dir = []
     if (keyName.hasOwnProperty('Source name') && keyName.hasOwnProperty('Fiscal Year End Date')) {
         var c = Object.keys(keyName)
         let s = c.indexOf('Source name')
         let e = c.indexOf('Fiscal Year End Date')
+
         for (let i = e + 1; i < s; i++) {
-            dir.push(c[i])
-
+            if(c[i].length > 1 && !c[i].includes('__E'))
+            {
+                dir.push(c[i])
+            }
         }
-
+        console.log('nnnnnnnnnnnnnnnnnnnnnnnn' , keyName['Fiscal Year'] ,  dir)
     }
-    return dir
+    resolve( dir)
+})
 
 }
 async function fi(keyName) {
@@ -495,6 +571,7 @@ async function fi(keyName) {
         let s = c.indexOf('Source name')
         let e = c.indexOf('Fiscal Year End Date')
         for (let i = e + 1; i < s; i++) {
+
             dir.push(c[i])
 
         }

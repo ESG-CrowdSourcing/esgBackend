@@ -17,14 +17,13 @@ exports.getDirectors = (director) => {
 async function file(company, derviedValues, fiscal, matrix) {
     return new Promise(async (resolve, reject) => {
 
-        var dataValues = [], datapoints = {} , missed = [], result =[]
+        var dataValues = [], datapoints = {}, missed = [], result = []
 
         for (let fi = 0; fi < fiscal.length; fi++) {
             if (matrix.includes(fiscal[fi].DPCode)) {
 
             }
             else {
-              //  let del = await dataSchema.deleteMany({ companyName: company, performance: "" }).exec();
                 missed.push(fiscal[fi].DPCode);
                 datapoints = {
                     Year: fiscal[fi].fiscalYear,
@@ -58,7 +57,7 @@ exports.getAllData = (company) => {
             let matrixValue = await matrix.find({ standaloneMatrix: 'Matrix' }).distinct('DPCode').exec();
             let fiscal = await dataSchema.find({ companyName: company, fiscalYear: year[yr] }).exec()
 
-            let dpValueCheck = await dpSchema.find({ dataCollection: 'No', }).distinct('DPCode').exec()
+            let dpValueCheck = await dpSchema.find({ dataCollection: 'No', }).distinct('DPCode').exec();
             let f = await file(company, dpValueCheck, fiscal, matrixValue);
 
             yearData = {

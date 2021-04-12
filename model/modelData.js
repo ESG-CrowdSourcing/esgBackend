@@ -49,10 +49,6 @@ var dataSchema = new schema({
         type:String,
         required:false
     },
-    directors:{
-        type:Array,
-        required:false
-    },
     percentile: {
         type: String,
         required: false
