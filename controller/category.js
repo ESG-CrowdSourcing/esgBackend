@@ -15,8 +15,7 @@ var matrixData = require('../model/matrixData')
 
 mongoose.Schema.Types.Boolean.convertToFalse.add('');
 var dataCollectionSchema = require('../model/dpCode');
-var controversySchema = require('../model/modelcontroversy');
-const { resolve } = require('path');
+
 exports.masterTaxonomy = (masterData) => {
     return new Promise(async (resolve, reject) => {
         file
@@ -188,7 +187,7 @@ exports.fileUploadData = (caragoryData) => {
                 keyIssuesID: keyData._id,
                 DPCode: caragoryData['DP Code'],
                 dataCollection: caragoryData['Data Collection'],
-                functions :caragoryData['Function'],
+                functions: caragoryData['Function'],
                 DPName: caragoryData['DP Name'],
                 description: caragoryData['Description'],
                 unit: caragoryData['Unit'],
@@ -319,7 +318,37 @@ exports.fileUploadMaster = (dir, company, caragoryData) => {
         if (dataCollection.includes(caragoryData['DP Code']) || caragoryData['DP Code'] == 'Category') {
             if (dir.length == 0) {
                 if (data.length > 1) {
+<<<<<<< HEAD
                     let update = { $set: {  companyName: company._id,
+=======
+                    let update = {
+                        $set: {
+                            companyName: company._id,
+                            DPCode: caragoryData['DP Code'],
+                            DPType: caragoryData['Data Type'],
+                            description: caragoryData['Description'],
+                            unit: caragoryData['Unit'],
+                            fiscalYear: caragoryData['Fiscal Year'],
+                            indicator: caragoryData['Indicator'],
+                            fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                            response: caragoryData['Response'],
+                            sourceName: caragoryData['Source name'],
+                            sourceURL: caragoryData['URL'],
+                            sourcePublicationDate: caragoryData['Publication date'],
+                            pageNumber: caragoryData['Page number'],
+                            snapshot: caragoryData['Text snippet'],
+                            comments: caragoryData['Comments/Calculations']
+                        }
+                    }
+
+                    await clientData.updateOne({ companyName: company._id, fiscalYear: caragoryData['Fiscal Year'], DPCode: caragoryData['DP Code'] }, update).exec();
+                    resolve(data[0])
+                }
+                else {
+                    const dataSche = new dataSchema({
+                        _id: new mongoose.Types.ObjectId(),
+                        companyName: company._id,
+>>>>>>> f1e7fa381dbe4f13ad08b28a4632f52ac207d889
                         DPCode: caragoryData['DP Code'],
                         DPType: caragoryData['Data Type'],
                         description: caragoryData['Description'],
@@ -333,14 +362,52 @@ exports.fileUploadMaster = (dir, company, caragoryData) => {
                         sourcePublicationDate: caragoryData['Publication date'],
                         pageNumber: caragoryData['Page number'],
                         snapshot: caragoryData['Text snippet'],
+<<<<<<< HEAD
                         comments: caragoryData['Comments/Calculations'] } }
 
                         await clientData.updateOne({ companyName: company._id, fiscalYear: caragoryData['Fiscal Year'], DPCode: caragoryData['DP Code'] }, update).exec();
 
+=======
+                        comments: caragoryData['Comments/Calculations'],
+                    }).save().then(themed => {
+                        resolve(themed);
+                    });
+                }
+            }
+            else {
+                let directors = await director(dir, caragoryData);
+
+                if (data.length > 1) {
+                    let update = {
+                        $set: {
+                            companyName: company._id,
+                            DPCode: caragoryData['DP Code'],
+                            DPType: caragoryData['Data Type'],
+                            description: caragoryData['Description'],
+                            unit: caragoryData['Unit'],
+                            fiscalYear: caragoryData['Fiscal Year'],
+                            indicator: caragoryData['Indicator'],
+                            fiscalYearEnddate: caragoryData['Fiscal Year End Date'],
+                            response: caragoryData['Response'],
+                            sourceName: caragoryData['Source name'],
+                            sourceURL: caragoryData['URL'],
+                            sourcePublicationDate: caragoryData['Publication date'],
+                            pageNumber: caragoryData['Page number'],
+                            snapshot: caragoryData['Text snippet'],
+                            comments: caragoryData['Comments/Calculations'], directors: directors
+                        }
+                    }
+
+                    await clientData.updateOne({ companyName: company._id, fiscalYear: caragoryData['Fiscal Year'], DPCode: caragoryData['DP Code'] }, update).exec();
+>>>>>>> f1e7fa381dbe4f13ad08b28a4632f52ac207d889
 
                     resolve(data[0])
                 }
                 else {
+<<<<<<< HEAD
+=======
+
+>>>>>>> f1e7fa381dbe4f13ad08b28a4632f52ac207d889
                     const dataSche = new dataSchema({
                         _id: new mongoose.Types.ObjectId(),
                         companyName: company._id,
