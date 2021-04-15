@@ -90,7 +90,7 @@ exports.companyTitle = (titleData) => {
                 CMIE_ProwessCode: titleData[0]['CMIE/Prowess Code'],
                 NIC_industry: titleData[0]['NIC industry'],
                 ISIN_Code: titleData[0]['ISIN Code'],
-                nic :nic.substring(0,1),
+                nic :nic.substring(0,2),
                 NIC_Code: titleData[0]['NIC Code'],
                 GovernanceAnalystName: titleData[0]['Governance Analyst Name'],
                 GovernanceQAName: titleData[0]['Governance QA Name'],
