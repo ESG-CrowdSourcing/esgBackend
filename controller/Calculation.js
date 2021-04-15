@@ -1548,7 +1548,7 @@ exports.calc = async function (req, res) {
             return res.status(200).json({
                 message: "response updated",
             })
-        }, 8000);
+        }, 10000);
     } catch (error) {
         return res.status(405).json({
             message: error.message

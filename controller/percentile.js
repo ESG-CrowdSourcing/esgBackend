@@ -316,7 +316,6 @@ async function resValue(NIC) {
         try {
             let Nic_code = await company.find({ companyName: NIC }).distinct('nic').exec()
             let companyName = await company.find({ nic: Nic_code[0] }).distinct('_id').exec()
-            console.log("........................", companyName)
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
             let dpCodes = await data.find({}).distinct('DPCode').exec()
 
