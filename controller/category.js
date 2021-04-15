@@ -19,7 +19,6 @@ var controversySchema = require('../model/modelcontroversy');
 const { resolve } = require('path');
 exports.masterTaxonomy = (masterData) => {
     return new Promise(async (resolve, reject) => {
-        file
         dataSchema.find({ dataID: masterData._id }).exec().then(data => {
             if (masterData['URL'] == null) {
                 resolve(data[0])
@@ -45,6 +44,8 @@ exports.masterTaxonomy = (masterData) => {
 
 exports.companyTitle = (titleData) => {
     return new Promise(async (resolve, reject) => {
+        let nic = titleData[0]['NIC Code'].toString()
+        console.log("////////////////",nic.substring(0,1) )
 
         let data = await titleSchema.find({ companyName: titleData[0]['Company Name'] }).exec()
         if (data.length > 0) {
@@ -89,6 +90,7 @@ exports.companyTitle = (titleData) => {
                 CMIE_ProwessCode: titleData[0]['CMIE/Prowess Code'],
                 NIC_industry: titleData[0]['NIC industry'],
                 ISIN_Code: titleData[0]['ISIN Code'],
+                nic :nic.substring(0,1),
                 NIC_Code: titleData[0]['NIC Code'],
                 GovernanceAnalystName: titleData[0]['Governance Analyst Name'],
                 GovernanceQAName: titleData[0]['Governance QA Name'],
@@ -557,7 +559,6 @@ async function f(keyName) {
                 dir.push(c[i])
             }
         }
-        console.log('nnnnnnnnnnnnnnnnnnnnnnnn' , keyName['Fiscal Year'] ,  dir)
     }
     resolve( dir)
 })

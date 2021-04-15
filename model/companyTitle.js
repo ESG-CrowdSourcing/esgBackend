@@ -11,6 +11,11 @@ var titleSchema = new schema({
         type: String,
         required:true
     },
+    nic:{
+
+        type: String,
+        required:false
+    },
     NIC_Code:{
 
         type: String,

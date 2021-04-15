@@ -10,7 +10,7 @@ var matrixData = require('../model/matrixData')
 
 // debugger
 
-async function comma(value) {
+function comma(value) {
     return new Promise(async (resolve, reject) => {
         if (typeof (value) == 'string') {
             if (value.includes(',')) {
@@ -30,7 +30,7 @@ async function comma(value) {
 }
 
 
-async function arrComma(arr) {
+function arrComma(arr) {
     return new Promise(async (resolve, reject) => {
         var data = [];
 
@@ -54,7 +54,7 @@ async function arrComma(arr) {
     })
 }
 
-async function ratio(Num, Den) {
+function ratio(Num, Den) {
     return new Promise(async (resolve, reject) => {
         var value;
         try {
@@ -87,7 +87,7 @@ async function ratio(Num, Den) {
     })
 }
 
-async function percent(Num, Den) {
+function percent(Num, Den) {
     return new Promise(async (resolve, reject) => {
         try {
             if (Num === " " || Num == 'NA') {
@@ -116,7 +116,7 @@ async function percent(Num, Den) {
     })
 }
 
-async function add(Num1, Num2) {
+function add(Num1, Num2) {
     return new Promise(async (resolve, reject) => {
         try {
             if (Num1 === " " || Num2 === " ") {
@@ -137,7 +137,7 @@ async function add(Num1, Num2) {
     })
 }
 
-async function multiply(Num, Den) {
+function multiply(Num, Den) {
     return new Promise(async (resolve, reject) => {
         try {
             if (Num === " " || Den == 0 || Den === " ") {
@@ -161,7 +161,7 @@ async function multiply(Num, Den) {
 
     })
 }
-async function sumCount(arr) {
+function sumCount(arr) {
     return new Promise(async (resolve, reject) => {
         let arrValue = []
         try {
@@ -194,7 +194,7 @@ async function sumCount(arr) {
     })
 }
 
-async function activeData(company, y, dp) {
+function activeData(company, y, dp) {
     return new Promise(async (resolve, reject) => {
         let value = []
         let values = await matrixData.find({ companyName: company, fiscalYear: y, DPCode: dp, isActive: "true" }).exec();
@@ -205,7 +205,7 @@ async function activeData(company, y, dp) {
 
     })
 }
-async function sum(arr) {
+function sum(arr) {
     return new Promise(async (resolve, reject) => {
         try {
             if (!Array.isArray(arr)) {
@@ -232,7 +232,7 @@ async function sum(arr) {
 
 }
 
-async function compositeCount(arra1, arra2, criteria) {
+function compositeCount(arra1, arra2, criteria) {
     return new Promise(async (resolve, reject) => {
         let count = 0;
         let arr1 = arra1.filter(e => String(e.value).trim());
@@ -240,14 +240,14 @@ async function compositeCount(arra1, arra2, criteria) {
         try {
             if (criteria == 'Y') {
                 for (let i = 0; i < arr1.length; i++) {
-                    for(let j=0 ;j < arr2.length ; j++){
+                    for (let j = 0; j < arr2.length; j++) {
 
-                    if (arr1[i].dirName == arr2[j].dirName) {
-                        if (arr1[i].value == 'Yes' && arr2[j].value == 'Yes') {
-                            count++
+                        if (arr1[i].dirName == arr2[j].dirName) {
+                            if (arr1[i].value == 'Yes' && arr2[j].value == 'Yes') {
+                                count++
+                            }
                         }
                     }
-                }
                 }
             }
             resolve(count)
@@ -256,7 +256,7 @@ async function compositeCount(arra1, arra2, criteria) {
     })
 }
 
-async function count(arr, criteria) {
+function count(arr, criteria) {
     return new Promise(async (resolve, reject) => {
         let aarr = arr.filter(e => String(e).trim());
         let Arr = aarr.filter(e => e != 'NA')
@@ -319,7 +319,7 @@ async function count(arr, criteria) {
     })
 }
 
-async function sumMethod(company, year, value, dpcode) {
+function sumMethod(company, year, value, dpcode) {
     return new Promise(async (resolve, reject) => {
         let sumValue;
         let arr = await activeData(company, year, value)
@@ -343,7 +343,7 @@ async function sumMethod(company, year, value, dpcode) {
 
     })
 }
-async function DEN(checkDen, company, year) {
+function DEN(checkDen, company, year) {
     return new Promise(async (resolve, reject) => {
         try {
             if (checkDen.length > 0) {
@@ -411,7 +411,7 @@ async function DEN(checkDen, company, year) {
     })
 
 }
-async function NUM(checknum, company, year) {
+function NUM(checknum, company, year) {
     return new Promise(async (resolve, reject) => {
         try {
             if (checknum.length > 0) {
@@ -479,7 +479,7 @@ async function NUM(checknum, company, year) {
     })
 
 }
-async function Percentage(ruleValue, company, year, value) {
+function Percentage(ruleValue, company, year, value) {
     return new Promise(async (resolve, reject) => {
 
         let params = ruleValue[0].parameter.split(',')
@@ -501,6 +501,9 @@ async function Percentage(ruleValue, company, year, value) {
         let num = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[0] }).distinct('response').exec();
         let Den = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[1] }).distinct('response').exec();
         let response = await percent(num[0], Den[0])
+        
+
+
         let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
         if (dpCheck.length == 0) {
             const category = new clientData({
@@ -524,7 +527,7 @@ async function Percentage(ruleValue, company, year, value) {
     })
 }
 
-async function DPCHECK(company, year, value, response) {
+function DPCHECK(company, year, value, response) {
     return new Promise(async (resolve, reject) => {
         let dpCheck = await clientData.find({ companyName: company, fiscalYear: year, DPCode: value }).exec();
         if (dpCheck.length == 0) {
@@ -553,7 +556,7 @@ async function DPCHECK(company, year, value, response) {
 
 }
 
-async function Countof(ruleValue, company, year, numparams, value) {
+function Countof(ruleValue, company, year, numparams, value) {
     return new Promise(async (resolve, reject) => {
 
         if (ruleValue.methodType == 'composite') {
@@ -565,7 +568,6 @@ async function Countof(ruleValue, company, year, numparams, value) {
                 let arr2 = await matrixData.find({ companyName: company, fiscalYear: year, DPCode: params[0], isActive: "true" }).exec();
 
                 if (arr1.length > 0 || arr2.length > 0) {
-                    console.log("................." , arr1.length , arr2.length)
                     let response = await compositeCount(arr1, arr2, ruleValue.criteria)
                     await DPCHECK(company, year, value, response)
                     resolve('success')
@@ -611,9 +613,11 @@ async function Countof(ruleValue, company, year, numparams, value) {
         else {
 
             let arr = await activeData(company, year, numparams)
+
+
             if (arr.length > 0) {
                 let countValue = await count(arr, ruleValue.criteria)
-
+               
                 await DPCHECK(company, year, value, countValue)
                 resolve('success')
 
@@ -631,7 +635,7 @@ async function Countof(ruleValue, company, year, numparams, value) {
     })
 }
 
-async function minusValue(arrNum, arrDen) {
+function minusValue(arrNum, arrDen) {
     return new Promise(async (resolve, reject) => {
         let directors = []
         try {
@@ -672,47 +676,51 @@ async function minusValue(arrNum, arrDen) {
     })
 }
 
-async function Minus(ruleValue, company, year, value) {
+function Minus(ruleValue, company, year, value) {
     return new Promise(async (resolve, reject) => {
+        try {
 
-        let params = ruleValue.parameter.split(',')
-        let num = await matrixData.find({ companyName: company, fiscalYear: year, DPCode: params[1], isActive: "true" }).exec();
-        let Den = await matrixData.find({ companyName: company, fiscalYear: year, DPCode: params[0], isActive: "true" }).exec();
-        let directors = await minusValue(num, Den)
 
-        directors.forEach(async (element) => {
-            let dpCheck = await matrixData.find({ companyName: company, fiscalYear: year, DPCode: value, dirName: element.dirName }).exec();
-            if (dpCheck.length <= 0) {
-                const category = new matrixData({
-                    _id: new mongoose.Types.ObjectId(),
-                    companyName: company,
-                    fiscalYear: year,
-                    DPCode: value,
-                    dirName: element.dirName,
-                    value: element.value,
-                    isActive: 'true',
-                }).save()
-                resolve('success')
+            let params = ruleValue.parameter.split(',')
+            let num = await matrixData.find({ companyName: company, fiscalYear: year, DPCode: params[1], isActive: "true" }).exec();
+            let Den = await matrixData.find({ companyName: company, fiscalYear: year, DPCode: params[0], isActive: "true" }).exec();
+            let directors = await minusValue(num, Den)
 
-            }
-            else {
-                let update = {
-                    $set: {
+            directors.forEach(async (element) => {
+                let dpCheck = await matrixData.find({ companyName: company, fiscalYear: year, DPCode: value, dirName: element.dirName }).exec();
+                if (dpCheck.length <= 0) {
+                    const category = new matrixData({
+                        _id: new mongoose.Types.ObjectId(),
+                        companyName: company,
+                        fiscalYear: year,
                         DPCode: value,
                         dirName: element.dirName,
                         value: element.value,
                         isActive: 'true',
-                    }
-                }
-                await matrixData.updateOne({ companyName: company, fiscalYear: year, DPCode: value, dirName: element.dirName }, update).exec();
-                resolve('success')
-            }
-        })
+                    }).save()
+                    resolve('success')
 
+                }
+                else {
+                    let update = {
+                        $set: {
+                            DPCode: value,
+                            dirName: element.dirName,
+                            value: element.value,
+                            isActive: 'true',
+                        }
+                    }
+                    await matrixData.updateOne({ companyName: company, fiscalYear: year, DPCode: value, dirName: element.dirName }, update).exec();
+                    resolve('success')
+                }
+            })
+        } catch (error) {
+            reject(error)
+        }
     })
 }
 
-async function dividearr(arr1, arr2) {
+function dividearr(arr1, arr2) {
     return new Promise(async (resolve, reject) => {
 
         let directors = []
@@ -737,7 +745,7 @@ async function dividearr(arr1, arr2) {
 
 }
 
-async function divideValue(arr1, value) {
+function divideValue(arr1, value) {
     return new Promise(async (resolve, reject) => {
 
         let directors = []
@@ -756,7 +764,7 @@ async function divideValue(arr1, value) {
 
 }
 
-async function matrixPercentage(company, year, value, ruleValue) {
+function matrixPercentage(company, year, value, ruleValue) {
     return new Promise(async (resolve, reject) => {
         if (ruleValue.methodType == 'composite') {
 
@@ -803,6 +811,7 @@ async function matrixPercentage(company, year, value, ruleValue) {
             let Den = await clientData.find({ companyName: company, fiscalYear: year, DPCode: params[1] }).exec();
 
             let directors = await divideValue(num, Den[0].response)
+           
 
             directors.forEach(async (element) => {
                 let dpCheck = await matrixData.find({ companyName: company, fiscalYear: year, DPCode: value, dirName: element.dirName }).exec();
@@ -840,7 +849,7 @@ async function matrixPercentage(company, year, value, ruleValue) {
     })
 }
 
-async function ADD(company, year, ruleValue) {
+function ADD(company, year, ruleValue) {
     return new Promise(async (resolve, reject) => {
         let res = await clientData.find({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }).exec();
         if (res[0] == undefined) {
@@ -895,7 +904,7 @@ async function ADD(company, year, ruleValue) {
 }
 
 
-async function ifcondition(checkDen, company, year) {
+function ifcondition(checkDen, company, year) {
     return new Promise(async (resolve, reject) => {
         if (checkDen.length > 0) {
             if (checkDen[0].methodName == 'count of') {
@@ -907,7 +916,7 @@ async function ifcondition(checkDen, company, year) {
     })
 }
 
-async function As(company, y, ruleValue) {
+function As(company, y, ruleValue) {
     return new Promise(async (resolve, reject) => {
         let res = await clientData.find({ companyName: company, fiscalYear: y, DPCode: ruleValue[0].DPCode }).exec();
 
@@ -928,7 +937,7 @@ async function As(company, y, ruleValue) {
     })
 }
 
-async function AsRatio(company, year, ruleValue) {
+function AsRatio(company, year, ruleValue) {
     return new Promise(async (resolve, reject) => {
 
         let res = await clientData.find({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }).exec();
@@ -979,7 +988,7 @@ async function AsRatio(company, year, ruleValue) {
     })
 }
 
-async function AsPercentage(company, year, ruleValue, value) {
+function AsPercentage(company, year, ruleValue, value) {
     return new Promise(async (resolve, reject) => {
         let res = await clientData.find({ companyName: company, fiscalYear: year, DPCode: ruleValue[0].DPCode }).exec();
         if (res[0].response === " ") {
@@ -998,7 +1007,7 @@ async function AsPercentage(company, year, ruleValue, value) {
     })
 
 }
-async function Ratio(company, y, ruleValue, value) {
+function Ratio(company, y, ruleValue, value) {
     return new Promise(async (resolve, reject) => {
 
         let param = ruleValue[0].parameter.split(',')
@@ -1094,6 +1103,7 @@ async function Ratio(company, y, ruleValue, value) {
             let num = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[0] }).distinct('response').exec();
             let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[1] }).distinct('response').exec();
             let response = await ratio(num[0], Den[0])
+        
             let dpCheck = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: value }).exec();
 
             if (dpCheck.length == 0) {
@@ -1120,7 +1130,7 @@ async function Ratio(company, y, ruleValue, value) {
     })
 }
 
-async function RatioADD(company, y, ruleValue, value) {
+function RatioADD(company, y, ruleValue, value) {
     return new Promise(async (resolve, reject) => {
 
         let numpara = ruleValue[0].parameter.split(',')
@@ -1153,7 +1163,7 @@ async function RatioADD(company, y, ruleValue, value) {
         }
     })
 }
-async function YesNoValue(company, y, numpara) {
+function YesNoValue(company, y, numpara) {
     return new Promise(async (resolve, reject) => {
         let C = 0;
         for (let i = 0; i < numpara.length; i++) {
@@ -1166,7 +1176,7 @@ async function YesNoValue(company, y, numpara) {
         resolve(C)
     })
 }
-async function YesNO(company, y, value, ruleValue) {
+function YesNO(company, y, value, ruleValue) {
     return new Promise(async (resolve, reject) => {
         let numpara = ruleValue[0].parameter.split(',')
         let count = await YesNoValue(company, y, numpara)
@@ -1220,7 +1230,7 @@ async function YesNO(company, y, value, ruleValue) {
     })
 
 }
-async function PercentageValue(company, y, value, ruleValue) {
+function PercentageValue(company, y, value, ruleValue) {
     return new Promise(async (resolve, reject) => {
         if (ruleValue[0].methodType == 'sum,sum') {
             let params = ruleValue[0].parameter.split(',')
@@ -1259,7 +1269,44 @@ async function PercentageValue(company, y, value, ruleValue) {
 
     })
 }
-async function derivedCalc(companyName) {
+
+function derviedRatio(company, y) {
+    return new Promise(async (resolve, reject) => {
+        let ruleV = await rule.find({ methodName: "Ratio" }).exec()
+        ruleV.forEach(async (data) => {
+            let ruleValue = await rule.find({ DPCode: data.DPCode }).exec()
+            await Ratio(company, y, ruleValue, data.DPCode)
+
+        })
+        resolve('sucess')
+    })
+}
+function derviedRatioADD(company, y) {
+    return new Promise(async (resolve, reject) => {
+        let ruleV = await rule.find({ methodName: "RatioADD" }).exec()
+        ruleV.forEach(async (data) => {
+            let ruleValue = await rule.find({ DPCode: data.DPCode }).exec()
+            await RatioADD(company, y, ruleValue, data.DPCode)
+
+        })
+        resolve('sucess')
+    })
+}
+
+function derviedYesNo(company, y) {
+    return new Promise(async (resolve, reject) => {
+        let ruleV = await rule.find({ methodName: "YesNo" }).exec()
+        ruleV.forEach(async (data) => {
+            let ruleValue = await rule.find({ DPCode: data.DPCode }).exec()
+            await YesNo(company, y, data.DPCode, ruleValue)
+
+        })
+        resolve('sucess')
+    })
+}
+
+
+function derivedCalc(companyName) {
     return new Promise(async (resolve, reject) => {
 
         let company = await companytitle.find({ companyName: companyName }).exec()
@@ -1291,11 +1338,11 @@ async function derivedCalc(companyName) {
 
                         await PercentageValue(company, y, value, ruleValue)
                     }
-                    
+
                     else if (ruleValue[0].methodName == 'AsPercentage') {
                         await AsPercentage(company[0]._id, y, ruleValue, value)
                     }
-                   
+
 
                     else if (ruleValue[0].methodName == 'ADD') {
 
@@ -1382,7 +1429,7 @@ async function derivedCalc(companyName) {
 
 }
 
-async function activeDir(company, y) {
+function activeDir(company, y) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -1406,7 +1453,7 @@ async function activeDir(company, y) {
     })
 }
 
-async function depCountOf(company, y) {
+function depCountOf(company, y) {
     return new Promise(async (resolve, reject) => {
         let ruleValue = await rule.find({ methodName: "count of" }).exec()
         ruleValue.forEach(async (data) => {
@@ -1418,7 +1465,7 @@ async function depCountOf(company, y) {
     })
 }
 
-async function depSum(company, y) {
+function depSum(company, y) {
     return new Promise(async (resolve, reject) => {
         let ruleValue = await rule.find({ methodName: "Sum" }).exec()
         ruleValue.forEach(async (data) => {
@@ -1429,7 +1476,7 @@ async function depSum(company, y) {
     })
 }
 
-async function depMatrix(company, y) {
+function depMatrix(company, y) {
     return new Promise(async (resolve, reject) => {
         let ruleValue = await rule.find({ methodName: "MatrixPercentage" }).exec()
         ruleValue.forEach(async (data) => {
@@ -1441,7 +1488,7 @@ async function depMatrix(company, y) {
 
 }
 
-async function depMinus(company, y) {
+function depMinus(company, y) {
     return new Promise(async (resolve, reject) => {
         let ruleValue = await rule.find({ methodName: "Minus" }).exec()
         ruleValue.forEach(async (data) => {
@@ -1452,7 +1499,7 @@ async function depMinus(company, y) {
 
 }
 
-async function depRatio(company, y) {
+function depRatio(company, y) {
     return new Promise(async (resolve, reject) => {
         let values = ['MACR002', 'MACR007', 'MACR010']
         values.forEach(async (value) => {
@@ -1467,34 +1514,44 @@ async function depRatio(company, y) {
     })
 }
 
-exports.calc = function (req, res) {
+function depSumCount(companyName) {
     return new Promise(async (resolve, reject) => {
-        try {
-
-            let company = await companytitle.find({ companyName: req.params.companyName }).exec()
-            let year = await clientData.find({ companyName: company[0]._id }).distinct('fiscalYear').exec()
-            year.forEach(async (y) => {
-                await activeDir(company, y)
-                await depRatio(company, y)
-                await depMinus(company, y)
-                await depSum(company, y)
-                await depCountOf(company, y)
-                await depMatrix(company, y)
-            })
-            setTimeout(async () => {
-
-                await derivedCalc(req.params.companyName)
-
-                return res.status(200).json({
-                    message: "response updated",
-                })
-            }, 3000)
-
-        } catch (error) {
-            return res.status(405).json({
-                message: error.message
-            })
-        }
-
+        let company = await companytitle.find({ companyName: companyName }).exec()
+        let year = await clientData.find({ companyName: company[0]._id }).distinct('fiscalYear').exec()
+        await year.forEach(async (y) => {
+            await depCountOf(company, y)
+            await depSum(company, y)
+        })
+        resolve('success')
     })
+}
+exports.calc = async function (req, res) {
+    try {
+
+        let company = await companytitle.find({ companyName: req.params.companyName }).exec()
+        let year = await clientData.find({ companyName: company[0]._id }).distinct('fiscalYear').exec()
+        await year.forEach(async (y) => {
+            await activeDir(company, y)
+            await depMatrix(company, y)
+            await depMinus(company, y)
+            await depRatio(company, y)
+        })
+        setTimeout(async () => {
+            await depSumCount(req.params.companyName)
+
+        }, 2000)
+        setTimeout(async () => {
+            await derivedCalc(req.params.companyName)
+
+        }, 6000)
+        setTimeout(async () => {
+            return res.status(200).json({
+                message: "response updated",
+            })
+        }, 8000);
+    } catch (error) {
+        return res.status(405).json({
+            message: error.message
+        })
+    }
 }
