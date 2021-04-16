@@ -114,6 +114,9 @@ exports.percentile = function (req, res) {
                         let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
 
                         let std = await standardDeviation(dpValues);
+                        if(dp == 'EMDR001'){
+                            console.log("...................." , dp , company , y , response)
+                        }
                         if (response[0] === 'NA' || response[0] === " ") {
                             let responseValue = { $set: { performance: 'NA' } }
                             await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
@@ -141,7 +144,7 @@ exports.percentile = function (req, res) {
                     message: "percentile calculated",
                 })
 
-            }, 399500)
+            }, 199500)
 
 
         } catch (error) {
