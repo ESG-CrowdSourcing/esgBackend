@@ -316,7 +316,7 @@ async function missedDP(companyData, y, checkdp) {
         })
         resolve('updated')
     })
-}
+}   
 async function resValue(NIC) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -331,10 +331,12 @@ async function resValue(NIC) {
                     let polarityChecks = await data.find({ DPCode: dp }).distinct('polarityCheck').exec()
                     let numberCheck = await data.findOne({ DPCode: dp }).exec()
                     companyName.forEach(async (companyData) => {
+                        
                         // let clientdp = await clientData.find({ companyName: companyData, fiscalYear: y }).distinct('DPCode').exec()
 
                         // let checkdp = await compareValues(clientdp, dpCodes)
                         // await missedDP(companyData, y, checkdp);
+                       
 
                         if (polarityChecks[0] == "true") {
 
@@ -342,7 +344,10 @@ async function resValue(NIC) {
                         }
                         else {
                             let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
-
+ 
+                            if(dp == 'MACR003' || dp =='MACR008'){
+                                console.log(".........../ " , dp ,y , numberCheck.finalUnit , response[0] , response[0] == ' ' , isNaN(response[0])) 
+                            }
                             if (dp == 'BUSP008' || dp == 'BUSP009') {
                                 if (response[0] == 'No') {
                                     let responseValue = { $set: { performance: 'Positive' } }
@@ -389,7 +394,8 @@ async function resValue(NIC) {
                                 }
 
                             }
-                            else if ( response[0] === 'NA' || response[0] === " " || isNaN(response[0])) {
+                            else if ( response[0] === 'NA' || response[0] === " " || response[0] === 'NaN') {
+        
                                 let responseValue = { $set: { performance: 'NA', response: 'NA' } }
                                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
                             }
