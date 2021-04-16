@@ -15,7 +15,6 @@ function comma(value) {
         if (typeof (value) == 'string') {
             if (value.includes(',')) {
                 var resolvedValue = value.replace(/,/g, '').trim();
-
                 resolve(resolvedValue)
             }
             else {
@@ -39,7 +38,6 @@ function arrComma(arr) {
             if (typeof (value) == 'string') {
                 if (value.includes(',')) {
                     var resolvedValue = value.replace(/,/g, '').trim();
-
                     data.push(resolvedValue)
                 }
                 else {
@@ -1543,12 +1541,12 @@ exports.calc = async function (req, res) {
         setTimeout(async () => {
             await derivedCalc(req.params.companyName)
 
-        }, 6000)
+        }, 8000)
         setTimeout(async () => {
             return res.status(200).json({
                 message: "response updated",
             })
-        }, 10000);
+        }, 15000);
     } catch (error) {
         return res.status(405).json({
             message: error.message

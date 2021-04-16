@@ -114,12 +114,16 @@ exports.percentile = function (req, res) {
                         let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
 
                         let std = await standardDeviation(dpValues);
-                        if(dp == 'EMDR001'){
-                            console.log("...................." , dp , company , y , response)
-                        }
-                        if (response[0] === 'NA' || response[0] === " ") {
-                            let responseValue = { $set: { response :'NA' ,performance: 'NA' } }
+                       
+                        if (response[0] === " ") {
+                            let responseValue = { $set: { response: 'NA', performance: 'NA' } }
                             await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
+
+                        }
+                        else if (response[0] === 'NA'){
+                            let responseValue = { $set: { performance: 'NA' } }
+                            await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
+
 
                         } else {
 
@@ -339,6 +343,7 @@ async function resValue(NIC) {
                         }
                         else {
                             let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
+
                             if (dp == 'BUSP008' || dp == 'BUSP009') {
                                 if (response[0] == 'No') {
                                     let responseValue = { $set: { performance: 'Positive' } }
@@ -385,16 +390,13 @@ async function resValue(NIC) {
                                 }
 
                             }
-                            else if (response[0] == 'NA' || response[0] === " " || isNaN(response[0])) {
-                                // if (polarityCheck[0] === 'Positive' || polarityCheck[0] === 'Negative' || polarityCheck[0] === 'Neutral') {
-                                let responseValue = { $set: { performance: 'NA', response: 'NA' } }
-                                await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
-                                // }
-                            }
-                            else if (numberCheck.finalUnit === 'Number' || numberCheck.finalUnit === 'Number (Tonne)' || numberCheck.finalUnit === 'Number (tCO2e)' || numberCheck.finalUnit === 'Currency' || numberCheck.finalUnit === 'Days' || numberCheck.finalUnit === 'Hours' || numberCheck.finalUnit === 'Miles' || numberCheck.finalUnit === 'Million Hours Worked' || numberCheck.finalUnit === 'No/Low/Medium/High/Very High' || numberCheck.finalUnit === 'Number (tCFCe)' || numberCheck.finalUnit === 'Number (Cubic meter)' || numberCheck.finalUnit === 'Number (KWh)' || numberCheck.finalUnit === 'Percentage' && polarityChecks[0] != "true" && numberCheck.signal == 'No') {
+                            else if (numberCheck.finalUnit === 'Number' || numberCheck.finalUnit === 'Number (Tonne)' || numberCheck.finalUnit === 'Number (tCO2e)' || numberCheck.finalUnit.trim() === 'Currency' || numberCheck.finalUnit === 'Days' || numberCheck.finalUnit === 'Hours' || numberCheck.finalUnit === 'Miles' || numberCheck.finalUnit === 'Million Hours Worked' || numberCheck.finalUnit === 'No/Low/Medium/High/Very High' || numberCheck.finalUnit === 'Number (tCFCe)' || numberCheck.finalUnit === 'Number (Cubic meter)' || numberCheck.finalUnit === 'Number (KWh)' || numberCheck.finalUnit === 'Percentage' && numberCheck.signal == 'No') {
                                 let responseValue = { $set: { performance: response[0] } }
                                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
-
+                            }
+                            else if ( response[0] === 'NA' || response[0] === " " || isNaN(response[0])) {
+                                let responseValue = { $set: { performance: 'NA', response: 'NA' } }
+                                await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
                             }
                         }
                     })
