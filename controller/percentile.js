@@ -118,7 +118,7 @@ exports.percentile = function (req, res) {
                             console.log("...................." , dp , company , y , response)
                         }
                         if (response[0] === 'NA' || response[0] === " ") {
-                            let responseValue = { $set: { performance: 'NA' } }
+                            let responseValue = { $set: { response :'NA' ,performance: 'NA' } }
                             await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
 
                         } else {
@@ -162,7 +162,7 @@ function percentileCalc(value, dp, companyData, y) {
 
         if (value === 'NA' || isNaN(value)) {
 
-            let responseValue = { $set: { response: 'NA', performance: 'NA' } }
+            let responseValue = { $set: { performance: 'NA' } }
             await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
         }
         else if (value > 4) {
