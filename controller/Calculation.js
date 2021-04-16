@@ -1501,7 +1501,7 @@ function depMinus(company, y) {
 
 function depRatio(company, y) {
     return new Promise(async (resolve, reject) => {
-        let values = ['MACR002', 'MACR007', 'MACR010']
+        let values = ['MACR002', 'MACR007', 'MACR010','EMSR018']
         values.forEach(async (value) => {
             let ruleValue = await rule.find({ DPCode: value }).exec()
 
