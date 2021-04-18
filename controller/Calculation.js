@@ -264,7 +264,7 @@ function count(arr, criteria) {
                 resolve('NA')
             }
             else {
-                if (criteria == '0.02') {
+                if (criteria == '2') {
                     if (Arr.length > 0) {
                         var value = Arr.filter(item => item >= criteria).length;
                         resolve(value)
