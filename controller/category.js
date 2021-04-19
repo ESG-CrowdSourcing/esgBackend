@@ -44,8 +44,10 @@ exports.masterTaxonomy = (masterData) => {
 
 exports.companyTitle = (titleData) => {
     return new Promise(async (resolve, reject) => {
+        try{
+
+       
         let nic = titleData[0]['NIC Code'].toString()
-        console.log("////////////////",nic.substring(0,1) )
 
         let data = await titleSchema.find({ companyName: titleData[0]['Company Name'] }).exec()
         if (data.length > 0) {
@@ -103,7 +105,9 @@ exports.companyTitle = (titleData) => {
             });
         }
 
-
+    }catch(error){
+           reject(error) 
+    }
     })
 
 }

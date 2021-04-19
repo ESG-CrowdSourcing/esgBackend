@@ -1534,19 +1534,30 @@ exports.calc = async function (req, res) {
             await depMinus(company, y)
             await depRatio(company, y)
         })
-        setTimeout(async () => {
-            await depSumCount(req.params.companyName)
+        // setTimeout(async () => {
+        //     await depSumCount(req.params.companyName)
 
-        }, 2000)
-        setTimeout(async () => {
-            await derivedCalc(req.params.companyName)
+        // }, 2000)
+        // setTimeout(async () => {
+        //     await derivedCalc(req.params.companyName)
 
-        }, 8000)
+        // }, 8000)
+
+        function myFunction() {
+            setTimeout(function(){ depSumCount(req.params.companyName) }, 2000);
+          }
+           
+          function myFunction1() {
+            setTimeout(function(){ derivedCalc(req.params.companyName) }, 9000);
+          }
+       
+          myFunction()
+          myFunction1()
         setTimeout(async () => {
             return res.status(200).json({
                 message: "response updated",
             })
-        }, 15000);
+        }, 18000);
     } catch (error) {
         return res.status(405).json({
             message: error.message
