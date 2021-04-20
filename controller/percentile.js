@@ -144,12 +144,12 @@ exports.percentile = function (req, res) {
 
                                 let value = await positive(dp, companyData, y, dpValues, Number(response[0]), std)
                                 await percentileCalc(value, dp, companyData, y)
-                                console.log(" CompanyName :::: " , companyData , " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
+                                console.log(" CompanyName :::: " , companyData  , dp, " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
                             }
                             else if (polarityCheck[0] === 'Negative') {
                                 let value = await negative(dp, companyData, y, dpValues, Number(response[0]), std)
                                 await percentileCalc(value, dp, companyData, y)
-                                console.log(" CompanyName :::: " , companyData , " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
+                                console.log(" CompanyName :::: " , companyData ,dp , " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
 
                             }
                         }
