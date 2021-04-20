@@ -82,13 +82,15 @@ async function negative(dp, companyData, y, values, response, stdDev) {
     })
 }
 async function companyDetails(dp, y, companyName) {
-    let dpValues = []
     return new Promise(async (resolve, reject) => {
+        let dpValues = []
+
         await companyName.forEach(async (companys) => {
             let dpValu = await clientData.find({ DPCode: dp, fiscalYear: y, companyName: companys }).distinct('response').exec()
+            console.log("/>>>>>>>>?>>>>>>>>>>?>>>>>>>>>" , dpValu)
+
             dpValues.push(dpValu[0]);
         })
-        console.log("/>>>>>>>>?>>>>>>>>>>?>>>>>>>>>" , dpValues)
         resolve(dpValues)
     })
 }
