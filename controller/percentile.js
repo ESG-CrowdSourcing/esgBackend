@@ -102,7 +102,7 @@ exports.percentile = function (req, res) {
             var NIC = req.params.NIC
 
             let Nic_code = await company.find({ companyName: NIC }).distinct('nic').exec()
-            let companyName = await company.find({ nic: Nic_code[0] }).exec()
+            let companyName = await company.find({ nic: Nic_code[0] }).distinct('_id').exec()
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
             let dpCodes = await data.find({ percentile: 'Yes' }).distinct('DPCode').exec()
 
