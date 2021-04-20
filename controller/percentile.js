@@ -104,63 +104,63 @@ exports.percentile = function (req, res) {
             let Nic_code = await company.find({ companyName: NIC }).distinct('nic').exec()
             let companyName = await company.find({ nic: Nic_code[0] }).exec()
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
-           // let dpCodes = await data.find({ percentile: 'Yes' }).distinct('DPCode').exec()
+            let dpCodes = await data.find({ percentile: 'Yes' }).distinct('DPCode').exec()
 
             
             console.log(" company Name  :::::        " , companyName )
-            // await year.forEach(async (y) => {
-            //      console.log(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; year " , y)
+            await year.forEach(async (y) => {
+                 console.log(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; year " , y)
 
-            //    await dpCodes.forEach(async (dp) => {
-            //         console.log( " ................/ ////////////// " , dp , y)
-            //         let dpValues = await companyDetails(dp, y, companyName)
+               await dpCodes.forEach(async (dp) => {
+                    console.log( " ................/ ////////////// " , dp , y)
+                    let dpValues = await companyDetails(dp, y, companyName)
 
-            //          await companyName.forEach(async (companyData) => {
-            //              console.log('/???????????????????????????????????' , dpCodes.length , dpValues , y )
+                     await companyName.forEach(async (companyData) => {
+                         console.log('/???????????????????????????????????' , dpCodes.length , dpValues , y )
 
-            //             let polarityCheck = await data.find({ DPCode: dp, percentile: 'Yes' }).distinct('polarity').exec()
-            //             console.log(";;;;;;;;;;;;;;;;;;;;;;;;;;; , ................. llllllllllllllllllll " , polarityCheck)
-            //             let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
-            //             console.log("DDPPPPPPPPPPPCODE VALUESSSSSSSSSSS" , dpValues)
+                        let polarityCheck = await data.find({ DPCode: dp, percentile: 'Yes' }).distinct('polarity').exec()
+                        console.log(";;;;;;;;;;;;;;;;;;;;;;;;;;; , ................. llllllllllllllllllll " , polarityCheck)
+                        let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
+                        console.log("DDPPPPPPPPPPPCODE VALUESSSSSSSSSSS" , dpValues)
 
-            //             let std = await standardDeviation(dpValues);
+                        let std = await standardDeviation(dpValues);
                         
-            //             console.log(".........", companyData , y , response)
+                        console.log(".........", companyData , y , response)
 
-            //             if (response[0] === " ") {
+                        if (response[0] === " ") {
                             
-            //                 let responseValue = { $set: { response: 'NA', performance: 'NA' } }
-            //                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
+                            let responseValue = { $set: { response: 'NA', performance: 'NA' } }
+                            await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
 
-            //             }
-            //             else if (response[0] === 'NA') {
+                        }
+                        else if (response[0] === 'NA') {
                            
-            //                 let responseValue = { $set: { performance: 'NA' } }
-            //                 await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
+                            let responseValue = { $set: { performance: 'NA' } }
+                            await clientData.updateOne({ DPCode: dp, companyName: companyData, fiscalYear: y }, responseValue).exec()
 
-            //             } else {
+                        } else {
 
-            //                 if (polarityCheck[0] === 'Positive') {
+                            if (polarityCheck[0] === 'Positive') {
 
-            //                     let value = await positive(dp, companyData, y, dpValues, Number(response[0]), std)
-            //                     await percentileCalc(value, dp, companyData, y)
-            //                     console.log(" CompanyName :::: " , companyData , " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
-            //                 }
-            //                 else if (polarityCheck[0] === 'Negative') {
-            //                     let value = await negative(dp, companyData, y, dpValues, Number(response[0]), std)
-            //                     await percentileCalc(value, dp, companyData, y)
-            //                     console.log(" CompanyName :::: " , companyData , " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
+                                let value = await positive(dp, companyData, y, dpValues, Number(response[0]), std)
+                                await percentileCalc(value, dp, companyData, y)
+                                console.log(" CompanyName :::: " , companyData , " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
+                            }
+                            else if (polarityCheck[0] === 'Negative') {
+                                let value = await negative(dp, companyData, y, dpValues, Number(response[0]), std)
+                                await percentileCalc(value, dp, companyData, y)
+                                console.log(" CompanyName :::: " , companyData , " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
 
-            //                 }
-            //             }
-            //         })
+                            }
+                        }
+                    })
 
-            //     });
-            // })
-            // setTimeout(async () =>{
-            //     await resValue(NIC)
+                });
+            })
+            setTimeout(async () =>{
+                await resValue(NIC)
 
-            // },18900)
+            },18900)
             // function myFunction() {
 
             //     setTimeout(function () { resValue(NIC) }, 18000);
