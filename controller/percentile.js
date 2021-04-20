@@ -103,18 +103,18 @@ exports.percentile = function (req, res) {
             let dpCodes = await data.find({ percentile: 'Yes' }).distinct('DPCode').exec()
 
             console.log(" company Name  :::::        " , companyName , year)
-             year.forEach(async (y) => {
+            await year.forEach(async (y) => {
                  console.log(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; year " , y)
 
-                 dpCodes.forEach(async (dp) => {
+               await dpCodes.forEach(async (dp) => {
 
                     let dpValues = await companyDetails(dp, y, companyName)
-                    console.log("DDPPPPPPPPPPPCODE VALUESSSSSSSSSSS" , dpValues)
 
-                     companyName.forEach(async (companyData) => {
+                     await companyName.forEach(async (companyData) => {
 
                         let polarityCheck = await data.find({ DPCode: dp, percentile: 'Yes' }).distinct('polarity').exec()
                         let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
+                        console.log("DDPPPPPPPPPPPCODE VALUESSSSSSSSSSS" , dpValues)
 
                         let std = await standardDeviation(dpValues);
                         
