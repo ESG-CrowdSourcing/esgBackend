@@ -45,7 +45,7 @@ exports.masterTaxonomy = (masterData) => {
 exports.companyTitle = (titleData) => {
     return new Promise(async (resolve, reject) => {
         try{
-
+          console.log( "///////////////////////////" ,  titleData)
        
         let nic = titleData[0]['NIC Code'].toString()
 

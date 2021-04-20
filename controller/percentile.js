@@ -102,6 +102,7 @@ exports.percentile = function (req, res) {
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
             let dpCodes = await data.find({ percentile: 'Yes' }).distinct('DPCode').exec()
 
+            console.log(" company Name  :::::        " , companyName)
             await year.forEach(async (y) => {
                 await dpCodes.forEach(async (dp) => {
 
@@ -132,26 +133,29 @@ exports.percentile = function (req, res) {
 
                                 let value = await positive(dp, companyData, y, dpValues, Number(response[0]), std)
                                 await percentileCalc(value, dp, companyData, y)
+                                console.log(" CompanyName :::: " , companyData , " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
                             }
                             else if (polarityCheck[0] === 'Negative') {
                                 let value = await negative(dp, companyData, y, dpValues, Number(response[0]), std)
                                 await percentileCalc(value, dp, companyData, y)
+                                console.log(" CompanyName :::: " , companyData , " year ::: " , y , " STDdeviation ::: " , std , " value  :: " , value)
+
                             }
                         }
                     })
 
                 });
             })
-            // setTimeout(async () =>{
-            //     await resValue(NIC)
+            setTimeout(async () =>{
+                await resValue(NIC)
 
-            // },14900)
-            function myFunction() {
+            },18900)
+            // function myFunction() {
 
-                setTimeout(function () { resValue(NIC) }, 18000);
-            }
+            //     setTimeout(function () { resValue(NIC) }, 18000);
+            // }
 
-            myFunction()
+            // myFunction()
             setTimeout(async () => {
 
                 res.status(200).json({

@@ -1101,7 +1101,7 @@ function Ratio(company, y, ruleValue, value) {
             let num = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[0] }).distinct('response').exec();
             let Den = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: param[1] }).distinct('response').exec();
             let response = await ratio(num[0], Den[0])
-        
+                    
             let dpCheck = await clientData.find({ companyName: company[0]._id, fiscalYear: y, DPCode: value }).exec();
 
             if (dpCheck.length == 0) {
@@ -1534,25 +1534,25 @@ exports.calc = async function (req, res) {
             await depMinus(company, y)
             await depRatio(company, y)
         })
-        // setTimeout(async () => {
-        //     await depSumCount(req.params.companyName)
+        setTimeout(async () => {
+            await depSumCount(req.params.companyName)
 
-        // }, 2000)
-        // setTimeout(async () => {
-        //     await derivedCalc(req.params.companyName)
+        }, 2000)
+        setTimeout(async () => {
+            await derivedCalc(req.params.companyName)
 
-        // }, 8000)
+        }, 8000)
 
-        function myFunction() {
-            setTimeout(function(){ depSumCount(req.params.companyName) }, 2000);
-          }
+        // function myFunction() {
+        //     setTimeout(function(){ depSumCount(req.params.companyName) }, 2000);
+        //   }
            
-          function myFunction1() {
-            setTimeout(function(){ derivedCalc(req.params.companyName) }, 9000);
-          }
+        //   function myFunction1() {
+        //     setTimeout(function(){ derivedCalc(req.params.companyName) }, 9000);
+        //   }
        
-          myFunction()
-          myFunction1()
+        //   myFunction()
+        //   myFunction1()
         setTimeout(async () => {
             return res.status(200).json({
                 message: "response updated",

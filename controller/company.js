@@ -9,12 +9,10 @@ var companyTitle = require('../model/companyTitle');
 exports.companyDetails = async function (req, res) {
 
     try {
-        let companyName;
         let missedDP
         for (let f = 0; f < req.files.length; f++) {
             let standardData = await multipleFileuploadController.sheetOne(req.files[f].path);
             let company = await category.companyTitle(standardData.companyArr[0]);
-
             for (let i = 0; i < standardData.resultArr.length; i++) {
                 for (let j = 0; j < standardData.resultArr[i].length; j++) {
                     if (standardData.resultArr[i][j].Category == undefined) {
