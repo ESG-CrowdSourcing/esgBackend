@@ -117,6 +117,7 @@ exports.percentile = function (req, res) {
                          console.log('/???????????????????????????????????' , dpCodes.length , dpValues , y )
 
                         let polarityCheck = await data.find({ DPCode: dp, percentile: 'Yes' }).distinct('polarity').exec()
+                        console.log(";;;;;;;;;;;;;;;;;;;;;;;;;;; , ................. llllllllllllllllllll " , polarityCheck)
                         let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
                         console.log("DDPPPPPPPPPPPCODE VALUESSSSSSSSSSS" , dpValues)
 
