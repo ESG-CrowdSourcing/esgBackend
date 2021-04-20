@@ -102,19 +102,23 @@ exports.percentile = function (req, res) {
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
             let dpCodes = await data.find({ percentile: 'Yes' }).distinct('DPCode').exec()
 
-            console.log(" company Name  :::::        " , companyName)
-            await year.forEach(async (y) => {
-                await dpCodes.forEach(async (dp) => {
+            console.log(" company Name  :::::        " , companyName , year)
+             year.forEach(async (y) => {
+                 console.log(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; year " , y)
+
+                 dpCodes.forEach(async (dp) => {
 
                     let dpValues = await companyDetails(dp, y, companyName)
+                    console.log("DDPPPPPPPPPPPCODE VALUESSSSSSSSSSS" , dpValues)
 
-                    await companyName.forEach(async (companyData) => {
+                     companyName.forEach(async (companyData) => {
 
                         let polarityCheck = await data.find({ DPCode: dp, percentile: 'Yes' }).distinct('polarity').exec()
                         let response = await clientData.find({ DPCode: dp, companyName: companyData, fiscalYear: y }).distinct('response').exec();
 
                         let std = await standardDeviation(dpValues);
-
+                        
+                        console.log(".........", companyData , y , response)
 
                         if (response[0] === " ") {
                             
@@ -339,6 +343,7 @@ async function resValue(NIC) {
             let companyName = await company.find({ nic: Nic_code[0] }).distinct('_id').exec()
             let year = await clientData.find({ companyName: companyName[0] }).distinct('fiscalYear').exec()
             let dpCodes = await data.find({}).distinct('DPCode').exec()
+            console.log(" company Name  NIC ::,,,,,,        " , companyName)
 
             year.forEach(async (y) => {
                 dpCodes.forEach(async (dp) => {
