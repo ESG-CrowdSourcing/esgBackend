@@ -4,13 +4,16 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "convert-excel-to-json": "^1.7.0",
+    "crypto-js": "^4.0.0",
     "csvjson": "^5.1.0",
     "csvtojson": "^2.0.10",
     "debug": "^4.3.1",
@@ -21,14 +24,17 @@
     "fs": "0.0.1-security",
     "gaussian": "^1.2.0",
     "js-stats": "^1.0.5",
+    "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
     "mongoose": "^5.11.13",
     "multer": "^1.4.2",
+    "nodemailer": "^6.5.0",
     "nodemon": "^2.0.7",
     "normal-distribution": "0.0.9",
     "papaparse": "^5.3.0",
     "shortid": "^2.2.16",
+    "util.promisify": "^1.1.1",
     "xlsx": "^0.16.9",
     "xlsx-to-json": "^0.3.0",
     "ztable": "^1.0.7"
