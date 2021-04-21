@@ -5,7 +5,7 @@ var yearSchema=require('../model/year.model')
 var controversySchema = require('../model/controversy.model')
 const { result } = require('lodash')
 const { find, populate, db } = require('../model/companyTitle')
-const controversy = require('../model/controversy')
+//const controversy = require('../model/controversy')
 
 exports.controversy = async function (req, res) {
     try {
