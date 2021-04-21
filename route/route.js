@@ -5,6 +5,9 @@ var master = require('../controller/masterTaxonomy');
 var controversy= require('../controller/controversy')
 var calculation = require('../controller/Calculation');
 var percentile = require('../controller/percentile');
+var auth =require('../controller/authController');
+var login =require('../controller/loginController');
+var onBoarding=require('../controller/onBoardingController');
 const { get } = require('lodash');
 module.exports = function (app) {
 
@@ -32,7 +35,14 @@ module.exports = function (app) {
     app.route('/getAllCompany').get(masterFileUpload.getAllCompany)
     app.route('/getNICCode').get(masterFileUpload.getAllNIC);
     // app.route('/getDirectiveData/:companyName').post(masterFileUpload.getNewDataDir);
-
+    app.route('/onBoardEmployee').post(xslx.array('file',3),onBoarding.employee);
+    app.route('/onBoardClient').post(xslx.array('file',2),onBoarding.client);
+    app.route('/onBoardCompany').post(xslx.array('file',2),onBoarding.company)
+    app.route('/addUser').post(auth.authdication);
+    app.route('/login').post(login.login);
+    app.route('/OTPcheck').post(login.otpCheck);
+    app.route('/forgotpassword').post(login.forgotPassword);
+    app.route('/addRole').post(auth.role);
     app.route('/percentile/:NIC').post( percentile.percentile)
     app.route('/Ztable').post(xslx.single('file'),cmpany.Ztable);
     app.route('/polarityCheck').post(xslx.single('file'),cmpany.polarityCheck)
