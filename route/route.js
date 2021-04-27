@@ -6,6 +6,7 @@ var controversy= require('../controller/controversy')
 var calculation = require('../controller/Calculation');
 var percentile = require('../controller/percentile');
 var auth =require('../controller/authController');
+var login =require('../controller/loginController');
 const { get } = require('lodash');
 var path =require('path');
 
@@ -29,6 +30,9 @@ module.exports = function (app) {
     app.route('/calculation/:companyName').post(calculation.calc)
     app.route('/addUser').post(auth.authdication);
     app.route('/addRole').post(auth.role);
+    app.route('/login').post(login.login);
+    app.route('/OTPcheck').post(login.otpCheck);
+    app.route('/forgotpassword').post(login.forgotPassword);
     //app.route('/getcontroversy').get(controversy.getControvery);
 
     // app.route('/fetchNewCompanynewData/:companyName').get(masterFileUpload.fetchNewCompanynewData);
