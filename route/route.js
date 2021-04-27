@@ -5,6 +5,7 @@ var master = require('../controller/masterTaxonomy');
 var controversy= require('../controller/controversy')
 var calculation = require('../controller/Calculation');
 var percentile = require('../controller/percentile');
+var auth =require('../controller/authController');
 const { get } = require('lodash');
 var path =require('path');
 
@@ -26,6 +27,8 @@ module.exports = function (app) {
    // app.route('/controversy').post(xslx.array('file',2),controversy.controversy);
     app.route('/rule').post(xslx.single('file'),cmpany.rule);
     app.route('/calculation/:companyName').post(calculation.calc)
+    app.route('/addUser').post(auth.authdication);
+    app.route('/addRole').post(auth.role);
     //app.route('/getcontroversy').get(controversy.getControvery);
 
     // app.route('/fetchNewCompanynewData/:companyName').get(masterFileUpload.fetchNewCompanynewData);
