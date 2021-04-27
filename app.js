@@ -8,6 +8,9 @@ var express = require('express'),
         { useNewUrlParser: true,useUnifiedTopology: true }
     );
 var body_parser= require('body-parser');
+var cors = require('cors');
+
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '/uploads'))
