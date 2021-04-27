@@ -12,6 +12,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "convert-excel-to-json": "^1.7.0",
     "crypto-js": "^4.0.0",
     "csvjson": "^5.1.0",
