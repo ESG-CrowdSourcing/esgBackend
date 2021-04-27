@@ -9,6 +9,7 @@ var auth =require('../controller/authController');
 var login =require('../controller/loginController');
 var controversy= require('../controller/controversy')
 var onBoarding=require('../controller/onBoardingController');
+var insurance=require('../controller/insuranceComapnyController');
 const { get } = require('lodash');
 var path =require('path');
 
@@ -38,7 +39,9 @@ module.exports = function (app) {
     app.route('/forgotpassword').post(login.forgotPassword);
     app.route('/onBoardEmployee').post(xslx.array('file',3),onBoarding.employee);
     app.route('/onBoardClient').post(xslx.array('file',2),onBoarding.client);
-    app.route('/onBoardCompany').post(xslx.array('file',2),onBoarding.company)
+    app.route('/onBoardCompany').post(xslx.array('file',2),onBoarding.company);
+    app.route('/addinsCompany').post(insurance.addInsurance);
+    app.route('/getinsCompany').get(insurance.getInsurance);
     // app.route('/fetchNewCompanynewData/:companyName').get(masterFileUpload.fetchNewCompanynewData);
     // app.route('/fetchExistingCompanyData/:companyName').get(masterFileUpload.fetchNewCompanynewData);
     // app.route('/package/:companyName').get(masterFileUpload.package);
