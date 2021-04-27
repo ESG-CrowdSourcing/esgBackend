@@ -15,7 +15,7 @@ var matrixData = require('../model/matrixData')
 
 mongoose.Schema.Types.Boolean.convertToFalse.add('');
 var dataCollectionSchema = require('../model/dpCode');
-var controversySchema = require('../model/modelcontroversy');
+//var controversySchema = require('../model/modelcontroversy');
 const { resolve } = require('path');
 exports.masterTaxonomy = (masterData) => {
     return new Promise(async (resolve, reject) => {
@@ -486,7 +486,7 @@ exports.getDirectors = (company, key, value) => {
     })
 }
 
-exports.fileUploadControversy = (company, caragoryData) => {
+/*exports.fileUploadControversy = (company, caragoryData) => {
     return new Promise(async (resolve, reject) => {
         controversySchema.find({ companyName: company._id, DPCode: caragoryData['DP Code'] }).exec().then(data => {
             if (data.length > 1) {
@@ -531,7 +531,7 @@ exports.fileUploadControversy = (company, caragoryData) => {
         })
     });
 }
-
+*/
 
 exports.getNewAllCategory = (companyData) => {
     return new Promise(async (resolve, reject) => {
