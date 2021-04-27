@@ -20,7 +20,7 @@ try{
 
         if(password==req.body.password){
 
-            if(user.roleName.roleName=="Admin"){
+            if(user.roleName.roleName=="SuperAdmin"){
 
                 var otp = Math.floor(1000 + Math.random() * 9000);
                 let otpCheck=await OTP.findOneAndRemove({email:req.body.email}).exec()
