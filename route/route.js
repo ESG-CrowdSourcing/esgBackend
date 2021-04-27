@@ -7,6 +7,7 @@ var calculation = require('../controller/Calculation');
 var percentile = require('../controller/percentile');
 var auth =require('../controller/authController');
 var login =require('../controller/loginController');
+var controversy= require('../controller/controversy')
 const { get } = require('lodash');
 var path =require('path');
 
@@ -25,7 +26,8 @@ module.exports = function (app) {
 
     app.route('/master').post(xslx.single('file'),master.masterTaxonomy);
     app.route('/taxonomy').post(xslx.array('file', 40), cmpany.companyDetails);
-   // app.route('/controversy').post(xslx.array('file',2),controversy.controversy);
+    app.route('/controversy').post(xslx.array('file',2),controversy.controversy);
+    app.route('/getcontroversy').get(controversy.getControvery);
     app.route('/rule').post(xslx.single('file'),cmpany.rule);
     app.route('/calculation/:companyName').post(calculation.calc)
     app.route('/addUser').post(auth.authdication);
