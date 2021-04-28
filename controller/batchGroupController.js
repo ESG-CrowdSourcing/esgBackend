@@ -5,7 +5,7 @@ var groupQA=require('../model/groupQA.model');
 var groupAnalyst=require('../model/groupAnalyst.model');
 var user=require('../model/user.model');
 
-/*
+
 exports.createBatch=async(req,res)=>{
 
     try{
@@ -57,13 +57,13 @@ new groupSchema({
     }
 
 }
-*/
+
 exports.getUsers=async(req,res)=>{
 
 try{
 let groupAdmin=await user.find({roleName:'60879b248068fee5404344b9'}).select('name email rolename -_id').populate('roleName').exec();
-let QA=await user.find({roleName:'60879b3a8068fee5404344ba'}).select('name email rolename -_id').populate('roleName').exec(); 
-let analyst=await user.find({roleName:'60879b4a8068fee5404344bb'}).select('name email rolename -_id').populate('roleName').exec(); 
+let QA=await user.find({roleName:'60879b4a8068fee5404344bb'}).select('name email rolename -_id').populate('roleName').exec(); 
+let analyst=await user.find({roleName:'60879b3a8068fee5404344ba'}).select('name email rolename -_id').populate('roleName').exec(); 
 return res.status(200).json({
     groupAdmin:groupAdmin,
     QA:QA,
