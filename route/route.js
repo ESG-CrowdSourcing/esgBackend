@@ -10,6 +10,7 @@ var login =require('../controller/loginController');
 var controversy= require('../controller/controversy')
 var onBoarding=require('../controller/onBoardingController');
 var insurance=require('../controller/insuranceComapnyController');
+var batchGroup=require('../controller/batchGroupController');
 const { get } = require('lodash');
 var path =require('path');
 
@@ -53,4 +54,6 @@ module.exports = function (app) {
     app.route('/percentile/:NIC').post( percentile.percentile)
     app.route('/Ztable').post(xslx.single('file'),cmpany.Ztable);
     app.route('/polarityCheck').post(xslx.single('file'),cmpany.polarityCheck)
+    
+     app.route('/getUsers').get(batchGroup.getGroupAdmin);
 }                   
