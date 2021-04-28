@@ -55,5 +55,8 @@ module.exports = function (app) {
     app.route('/Ztable').post(xslx.single('file'),cmpany.Ztable);
     app.route('/polarityCheck').post(xslx.single('file'),cmpany.polarityCheck)
     
+     app.route('/createBatch').post(batchGroup.createBatch);
+     app.route('/createGroup').post(batchGroup.createGroup);
      app.route('/getUsers').get(batchGroup.getUsers);
+     app.route('/getcompanies').get(batchGroup.getCompanies);
 }                   
