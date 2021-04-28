@@ -13,7 +13,10 @@ try{
    userModel.findOne({email:req.body.email}).populate('roleName').exec(async function(err,user){
        
         if (err) return res.status(500).send('Error on the server.');
-        if (!user) return res.status(404).send('No user found.');
+        if (!user) return res.status(401).json({
+            message:'Invaild user',
+            status: 401
+        });
         
         var bytes  = CryptoJS.AES.decrypt(user.password, 'secret key 123');
         var password = bytes.toString(CryptoJS.enc.Utf8)
