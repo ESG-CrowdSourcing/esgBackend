@@ -4,6 +4,7 @@ var groupSchema=require('../model/group.model');
 var groupQA=require('../model/groupQA.model');
 var groupAnalyst=require('../model/groupAnalyst.model');
 var user=require('../model/user.model');
+var companyTitle=require('../model/companyTitle');
 
 
 exports.createBatch=async(req,res)=>{
@@ -34,26 +35,58 @@ exports.createBatch=async(req,res)=>{
 
     }
 catch(error){
-    return res.status(200).json({
+    return res.status(400).json({
         message:error.message
     })
 }
 
 }
 
-exports.createGroup=(req,res)=>{
+exports.createGroup=async(req,res)=>{
 
     try{
-new groupSchema({
-    groupName:req.body.groupName,
-    batchId:req.body.batchId,
-    groupAdmin:req.body.groupAdmin
-}).save((err,data)=>{
+let group=await groupSchema.find({groupName:req.body.groupName}).exec()
 
-})
+if(group.length==0){
+    new groupSchema({
+        groupName:req.body.groupName,
+        batchId:req.body.batchId,
+        groupAdmin:req.body.groupAdmin
+    }).save((err,data)=>{
+    
+     req.body.analyst.forEach((value)=>{
+      
+        new groupAnalyst({
+            analystDetails:value,
+            groupId:data._id
+    }).save()
+     
+       })
+      
+       req.body.qa.forEach((value)=>{
+        new groupQA({
+            qaDetails:value,
+            groupId:data._id
+           }).save()
+    })
+      
+    return res.status(200).json({
+        message:'group created successfully'
+    })
+    
+    })
+}else{
+    return res.status(200).json({
+        message:'Group aleady exist'
+    })
+}
+
+
     }
     catch(error){
-
+        return res.status(400).json({
+            message:error.message
+        })
     }
 
 }
@@ -61,9 +94,9 @@ new groupSchema({
 exports.getUsers=async(req,res)=>{
 
 try{
-let groupAdmin=await user.find({roleName:'60879b248068fee5404344b9'}).select('name email rolename -_id').populate('roleName').exec();
-let QA=await user.find({roleName:'60879b4a8068fee5404344bb'}).select('name email rolename -_id').populate('roleName').exec(); 
-let analyst=await user.find({roleName:'60879b3a8068fee5404344ba'}).select('name email rolename -_id').populate('roleName').exec(); 
+let groupAdmin=await user.find({roleName:'607e67ce83805b1450022856'}).select('name email rolename -_id').populate('roleName').exec();
+let QA=await user.find({roleName:'607e681283805b1450022857'}).select('name email rolename -_id').populate('roleName').exec(); 
+let analyst=await user.find({roleName:'607e682483805b1450022858'}).select('name email rolename -_id').populate('roleName').exec(); 
 return res.status(200).json({
     groupAdmin:groupAdmin,
     QA:QA,
@@ -80,5 +113,25 @@ catch(error){
 
 }
 
+}
+
+exports.getCompanies=async(req,res)=>{
+    try{
+let company=await companyTitle.find().exec()
+
+return res.status(200).json({
+    message:"success",
+    companyList:company
+
+})
+
+    }
+    catch(error){
+    return res.status(400).json({
+     message:error.message,
+           
+        })
+    
+    }
 }
 
