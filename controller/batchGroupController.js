@@ -5,7 +5,7 @@ var groupQA=require('../model/groupQA.model');
 var groupAnalyst=require('../model/groupAnalyst.model');
 var user=require('../model/user.model');
 
-
+/*
 exports.createBatch=async(req,res)=>{
 
     try{
@@ -57,7 +57,7 @@ new groupSchema({
     }
 
 }
-
+*/
 exports.getUsers=async(req,res)=>{
 
 try{
