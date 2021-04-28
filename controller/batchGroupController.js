@@ -61,9 +61,9 @@ new groupSchema({
 exports.getUsers=async(req,res)=>{
 
 try{
-let groupAdmin=await user.find({roleName:'607e67ce83805b1450022856'}).select('name email rolename -_id').populate('roleName').exec();
-let QA=await user.find({roleName:'607e681283805b1450022857'}).select('name email rolename -_id').populate('roleName').exec(); 
-let analyst=await user.find({roleName:'607e682483805b1450022858'}).select('name email rolename -_id').populate('roleName').exec(); 
+let groupAdmin=await user.find({roleName:'60879b248068fee5404344b9'}).select('name email rolename -_id').populate('roleName').exec();
+let QA=await user.find({roleName:'60879b3a8068fee5404344ba'}).select('name email rolename -_id').populate('roleName').exec(); 
+let analyst=await user.find({roleName:'60879b4a8068fee5404344bb'}).select('name email rolename -_id').populate('roleName').exec(); 
 return res.status(200).json({
     groupAdmin:groupAdmin,
     QA:QA,
