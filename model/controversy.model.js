@@ -7,7 +7,7 @@ var subsSchema=new schema({
         type: String,
   default: shortid.generate
     },
-    
+   
     sourceURL:{
         type: String
     },
@@ -17,11 +17,17 @@ var subsSchema=new schema({
     sourceName:{
         type: String
     },
+    Textsnippet:{
+        type: String
+    }
 },{_id:0})
 
 var controversySchema = new schema({
    
     data:[subsSchema],
+    maxResponseValue:{
+        type: String
+    },
     year: {
         type: String
     },
@@ -30,9 +36,6 @@ var controversySchema = new schema({
     },
     unit:{
         type: String
-    },
-    response:{
-        type: Number
     },
     companyId:{
         type: String
@@ -53,9 +56,7 @@ var controversySchema = new schema({
     lastModifiedDate:{
         type: Date, default: Date.now
     },
-    Textsnippet:{
-        type: String
-    }
+   
     
  
 });
