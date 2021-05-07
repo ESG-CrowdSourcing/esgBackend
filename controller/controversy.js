@@ -16,31 +16,6 @@ exports.controversy = async function (req, res) {
 
             var array = standardData.resultArr[0]
 
-            // var flags = [], output = [], l = array.length, i;
-            // for (i = 0; i < l; i++) {
-            //     if (flags[array[i]['Fiscal Year']]) continue;
-            //     flags[array[i]['Fiscal Year']] = true;
-            //     output.push(array[i]['Fiscal Year']);
-            // }
-
-            // output.forEach(result => {
-
-            //     let years = new yearSchema({
-            //         year: result,
-            //         companyName: company.companyName
-            //     })
-
-            //     years.save(function (err, data) {
-            //         if (err) {
-
-            //         }
-            //         else {
-
-            //         }
-            //     })
-            // })
-
-
             let companyValue = await companySchema.find({ companyName: company.companyName }).exec()
             if (companyValue.length < 0) {
                 let compayDetails = new companySchema({
@@ -63,7 +38,6 @@ exports.controversy = async function (req, res) {
                 })
             }
             // standardData.resultArr[0].forEach( async( result ) => {
-            let maxResponseValue = ''
             for (let index = 0; index < standardData.resultArr[0].length; index++) {
                 const result = standardData.resultArr[0][index];
                 // await Promise.all(standardData.resultArr[0].map( async( result ) => {
@@ -72,9 +46,11 @@ exports.controversy = async function (req, res) {
 
                 await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName })
                     .then(async (data) => {
-
+                     
                         if (data.length > 0) {
-                            const currentMaxResponse = data.maxResponse ? data.maxResponse : '';
+                            let maxResponseValue = ''
+
+                            const currentMaxResponse = data.maxResponseValue ? data.maxResponseValue : '';
                             let maxResponse = '';
                             let resRank = 0;
                             let resRankValue = '';
@@ -137,7 +113,7 @@ exports.controversy = async function (req, res) {
                                 DPcode: result['DP Code'],
                                 unit: result['Unit'],
                                 // response: result['Response'],
-                                maxResponseValue: maxResponseValue,
+                                maxResponseValue: result['Response'],
                                 data: [{
                                     sourceName: result['Source name'],
                                     Textsnippet: result['Text snippet'],
@@ -180,7 +156,7 @@ async function file(fiscal) {
 
         var dataValues = [], datapoints = {};
         for (let fi = 0; fi < fiscal.length; fi++) {
-            if (fiscal[fi].maxResponseValue == " " || fiscal[fi].maxResponseValue == ""){
+            if (fiscal[fi].maxResponseValue == " " || fiscal[fi].maxResponseValue == "") {
                 datapoints = {
                     Year: fiscal[fi].year,
                     DPCode: fiscal[fi].DPcode,
@@ -189,7 +165,7 @@ async function file(fiscal) {
                 }
                 dataValues.push(datapoints);
             }
-            else{
+            else {
                 datapoints = {
                     Year: fiscal[fi].year,
                     DPCode: fiscal[fi].DPcode,
@@ -198,7 +174,7 @@ async function file(fiscal) {
                 }
                 dataValues.push(datapoints);
             }
-            
+
         }
         resolve(dataValues)
     })
@@ -212,17 +188,17 @@ exports.getControvery = async function (req, res) {
     try {
 
         let companyName = await companySchema.find({ companyName: req.body.companyName }).exec()
-      //  let year = await controversySchema.find({ companyId: req.body.companyName }).distinct('year').exec()
+        //  let year = await controversySchema.find({ companyId: req.body.companyName }).distinct('year').exec()
 
-       // for (let yr = 0; yr < year.length; yr++) {
-            let fiscal = await controversySchema.find({ companyId: companyName[0].companyName, year: req.body.year }).exec()
-            let f = await file(fiscal)
-            yearData = {
-                year: req.body.year,
-                Data: f
-            }
-            yearValues.push(yearData)
-       // }
+        // for (let yr = 0; yr < year.length; yr++) {
+        let fiscal = await controversySchema.find({ companyId: companyName[0].companyName, year: req.body.year }).exec()
+        let f = await file(fiscal)
+        yearData = {
+            year: req.body.year,
+            Data: f
+        }
+        yearValues.push(yearData)
+        // }
         return res.status(200).json({
             companyName: companyName[0].companyName,
             CIN: companyName[0].CIN,
