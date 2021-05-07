@@ -773,14 +773,7 @@ function AsRatio(company, year, ruleValue) {
 
         if (res[0].response === " ") {
             let param = ruleValue[0].parameter.split(',')
-            let checknum = await rule.find({ DPCode: param[0] }).exec();
-            let checkDen = await rule.find({ DPCode: param[1] }).exec();
-            if (checknum.length > 0) {
-                await NUM(checknum, company, year)
-            }
-            if (checkDen.length > 0) {
-                await DEN(checkDen, company, year)
-            }
+           
             let num = await clientData.find({ companyName: company, fiscalYear: year, DPCode: param[0] }).distinct('response').exec();
             let Den = await clientData.find({ companyName: company, fiscalYear: year, DPCode: param[1] }).distinct('response').exec();
             let response = await ratio(num[0], Den[0])

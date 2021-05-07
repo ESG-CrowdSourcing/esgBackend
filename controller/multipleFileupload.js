@@ -50,14 +50,12 @@ exports.sheetOne = (url) => {
                             value.push(rowNum)
                         }
                     }
-                    
                 }
                let  res1 = await Directors(value,workbook.Sheets[sheet_name_list[i]])
                resultArr.push(res1[0])
                resultArr.push(res1[1])
             }else{
-                 res= XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[i]],{defval:" "});
-                  
+                 res= XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[i]],{defval:" "});                  
              }
             if(i == 0){
                 companyArr.push(res)
@@ -66,11 +64,8 @@ exports.sheetOne = (url) => {
                 resultArr.push(res)
             }            
         }        
-        resolve({ resultArr: resultArr, companyArr: companyArr });
-               
+        resolve({ resultArr: resultArr, companyArr: companyArr });     
         })
-
-
 }
 
 exports.masterSheets = (url)=>{

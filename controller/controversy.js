@@ -11,7 +11,6 @@ exports.controversy = async function (req, res) {
     try {
         for (let f = 0; f < req.files.length; f++) {
             let standardData = await multipleFileuploadController.sheetOne(req.files[f].path);
-
             let company = await category.companyTitle(standardData.companyArr[0]);
 
             var array = standardData.resultArr[0]
@@ -117,7 +116,7 @@ exports.controversy = async function (req, res) {
                                     // response: result['Response'],
                                     maxResponseValue: result['Response'],
                                     data: []    
-                                    
+
                                 });
                             }
                             else{

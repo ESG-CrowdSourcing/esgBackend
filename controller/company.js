@@ -15,6 +15,7 @@ exports.companyDetails = async function (req, res) {
             let company = await category.companyTitle(standardData.companyArr[0]);
             for (let i = 0; i < standardData.resultArr.length; i++) {
                 for (let j = 0; j < standardData.resultArr[i].length; j++) {
+
                     if (standardData.resultArr[i][j].Category == undefined) {
 
                     } else {
