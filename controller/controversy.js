@@ -106,22 +106,38 @@ exports.controversy = async function (req, res) {
                             //  console.log('update response', response);
                             // });
                         } else {
-                            await controversySchema.create({
+                            if(result['Source name'] === " "){
 
-                                companyId: company.companyName,
-                                year: result['Fiscal Year'],
-                                DPcode: result['DP Code'],
-                                unit: result['Unit'],
-                                // response: result['Response'],
-                                maxResponseValue: result['Response'],
-                                data: [{
-                                    sourceName: result['Source name'],
-                                    Textsnippet: result['Text snippet'],
-                                    sourceURL: result.URL,
-                                    sourcePublicationDate: result['Source Publication Date']
-                                }]
+                                await controversySchema.create({
 
-                            });
+                                    companyId: company.companyName,
+                                    year: result['Fiscal Year'],
+                                    DPcode: result['DP Code'],
+                                    unit: result['Unit'],
+                                    // response: result['Response'],
+                                    maxResponseValue: result['Response'],
+                                    data: []    
+                                    
+                                });
+                            }
+                            else{
+                                await controversySchema.create({
+
+                                    companyId: company.companyName,
+                                    year: result['Fiscal Year'],
+                                    DPcode: result['DP Code'],
+                                    unit: result['Unit'],
+                                    // response: result['Response'],
+                                    maxResponseValue: result['Response'],
+                                    data: [{
+                                        sourceName: result['Source name'],
+                                        Textsnippet: result['Text snippet'],
+                                        sourceURL: result.URL,
+                                        sourcePublicationDate: result['Source Publication Date']
+                                    }]
+    
+                                });
+                            }
                         }
                     })
                     .catch((err) => {
