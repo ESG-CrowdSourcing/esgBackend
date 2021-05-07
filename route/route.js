@@ -5,6 +5,7 @@ var master = require('../controller/masterTaxonomy');
 var controversy= require('../controller/controversy')
 var calculation = require('../controller/Calculation');
 var percentile = require('../controller/percentile');
+var percentile1 = require('../controller/percentile1');
 var auth =require('../controller/authController');
 var login =require('../controller/loginController');
 var controversy= require('../controller/controversy')
@@ -52,6 +53,7 @@ module.exports = function (app) {
     // app.route('/getDirectiveData/:companyName').post(masterFileUpload.getNewDataDir);
 
     app.route('/percentile/:NIC').post( percentile.percentile)
+    app.route('/percentile1/:NIC').post( percentile1.percentile)
     app.route('/Ztable').post(xslx.single('file'),cmpany.Ztable);
     app.route('/polarityCheck').post(xslx.single('file'),cmpany.polarityCheck)
     
