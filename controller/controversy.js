@@ -11,6 +11,7 @@ exports.controversy = async function (req, res) {
     try {
         for (let f = 0; f < req.files.length; f++) {
             let standardData = await multipleFileuploadController.sheetOne(req.files[f].path);
+
             let company = await category.companyTitle(standardData.companyArr[0]);
 
             var array = standardData.resultArr[0]
@@ -49,7 +50,7 @@ exports.controversy = async function (req, res) {
                         if (data.length > 0) {
                             let maxResponseValue = ''
 
-                            const currentMaxResponse = data.maxResponseValue ? data.maxResponseValue : '';
+                            const currentMaxResponse = data.maxResponseValue ? data.maxResponseValue : ' ';
                             let maxResponse = '';
                             let resRank = 0;
                             let resRankValue = '';
@@ -57,7 +58,7 @@ exports.controversy = async function (req, res) {
                             if (result['Response'] == 'Low') {
                                 result['Response'] = 1
                                 resRank = 1;
-                                resRank = 'Low';
+                                resRankValue = 'Low';
                             }
                             else if (result['Response'] == 'Medium') {
                                 result['Response'] = 2
@@ -80,6 +81,9 @@ exports.controversy = async function (req, res) {
                                 resRankValue = '';
                             }
 
+                            if (result['DP Code'] == 'DATN001'){
+                                console.log(" .............gggggghhhhh " ,result['Response'], currentMaxResponse , resRankValue  ,maxResponseValue)
+                            }
                             if (currentMaxResponse > resRank) {
                                 maxResponse = currentMaxResponse;
                                 maxResponseValue = resRankValue;
@@ -88,6 +92,7 @@ exports.controversy = async function (req, res) {
                                 maxResponseValue = resRankValue;
                             }
 
+                           
                             var update = {
                                 maxResponseValue: maxResponseValue,
                                 $push: {
@@ -105,8 +110,8 @@ exports.controversy = async function (req, res) {
                             //  console.log('update response', response);
                             // });
                         } else {
-                            if(result['Source name'] === " "){
 
+                            if(result['Source name'] == " "){
                                 await controversySchema.create({
 
                                     companyId: company.companyName,
@@ -115,8 +120,8 @@ exports.controversy = async function (req, res) {
                                     unit: result['Unit'],
                                     // response: result['Response'],
                                     maxResponseValue: result['Response'],
-                                    data: []    
-
+                                    data: []
+    
                                 });
                             }
                             else{
@@ -171,16 +176,17 @@ async function file(fiscal) {
 
         var dataValues = [], datapoints = {};
         for (let fi = 0; fi < fiscal.length; fi++) {
-            if (fiscal[fi].maxResponseValue == " " || fiscal[fi].maxResponseValue == "") {
-                datapoints = {
-                    Year: fiscal[fi].year,
-                    DPCode: fiscal[fi].DPcode,
-                    Response: fiscal[fi].maxResponseValue,
-                    controversy: []
-                }
-                dataValues.push(datapoints);
-            }
-            else {
+            // if (fiscal[fi].maxResponseValue == " " || fiscal[fi].maxResponseValue == "") {
+            //     datapoints = {
+            //         Year: fiscal[fi].year,
+            //         DPCode: fiscal[fi].DPcode,
+            //         Response: fiscal[fi].maxResponseValue,
+            //         controversy: []
+            //     }
+            //     dataValues.push(datapoints);
+            // }
+           // else {
+               // console.log (" ,,,,,,,,, " , fiscal[fi])
                 datapoints = {
                     Year: fiscal[fi].year,
                     DPCode: fiscal[fi].DPcode,
@@ -188,7 +194,7 @@ async function file(fiscal) {
                     controversy: fiscal[fi].data
                 }
                 dataValues.push(datapoints);
-            }
+           // }
 
         }
         resolve(dataValues)
