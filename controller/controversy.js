@@ -188,9 +188,9 @@ async function file(fiscal) {
            // else {
                // console.log (" ,,,,,,,,, " , fiscal[fi])
                 datapoints = {
+                    Dpcode: fiscal[fi].DPcode,
                     Year: fiscal[fi].year,
-                    DPCode: fiscal[fi].DPcode,
-                    Response: fiscal[fi].maxResponseValue,
+                    ResponseUnit: fiscal[fi].maxResponseValue,
                     controversy: fiscal[fi].data
                 }
                 dataValues.push(datapoints);
