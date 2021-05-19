@@ -92,7 +92,7 @@ exports.controversy = async function (req, res) {
                                 maxResponseValue = resRankValue;
                             }
 
-                           
+                           if(maxResponse != 0){                           
                             var update = {
                                 maxResponseValue: maxResponseValue,
                                 $push: {
@@ -106,12 +106,13 @@ exports.controversy = async function (req, res) {
                                 }
                             }
                             await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName }, update)
-                            // .then((response) => {
+                            
+                        }// .then((response) => {
                             //  console.log('update response', response);
                             // });
                         } else {
 
-                            if(result['Source name'] == " "){
+                            if(result['Source name'] == " " || result['Source name'] == "" ){
                                 await controversySchema.create({
 
                                     companyId: company.companyName,
