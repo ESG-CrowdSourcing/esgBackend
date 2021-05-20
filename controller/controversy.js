@@ -46,7 +46,8 @@ exports.controversy = async function (req, res) {
 
                 await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName })
                     .then(async (data) => {
-                     
+                        var dateValue = result['Source Publication Date']
+
                         if (data.length > 0) {
                             let maxResponseValue = ''
 
@@ -92,24 +93,38 @@ exports.controversy = async function (req, res) {
                                 maxResponseValue = resRankValue;
                             }
 
-                           if(maxResponse != 0){                           
+                           if(maxResponse != 0){ 
+                            var sourcePublicationDate = new Date(Math.round((dateValue - 25569)*86400*1000)).toLocaleDateString()
+                           let sourceDate= await controversySchema.find({DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName, data:{$elemMatch: {sourcePublicationDate: sourcePublicationDate}}})
+                            console.log(" ............ " , sourceDate.length  , sourcePublicationDate)
+                            if(sourceDate.length < 1){
+                                var update = {
+                                    maxResponseValue: maxResponseValue,
+                                    $push: {
+                                        data: {
+                                            // response: result['Response'],
+                                            sourceName: result['Source name'],
+                                            sourceURL: result.URL,
+                                            Textsnippet: result['Text snippet'],
+                                            sourcePublicationDate: sourcePublicationDate   
+    
+                                        }
+                                    }
+                                }
+                                await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName }, update)  
+                            }
+                            
+                        }
+                        else{
                             var update = {
                                 maxResponseValue: maxResponseValue,
                                 $push: {
-                                    data: {
-                                        // response: result['Response'],
-                                        sourceName: result['Source name'],
-                                        sourceURL: result.URL,
-                                        Textsnippet: result['Text snippet'],
-                                        sourcePublicationDate: result['Source Publication Date']
-                                    }
+                                    data: []
                                 }
                             }
-                            await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName }, update)
-                            
-                        }// .then((response) => {
-                            //  console.log('update response', response);
-                            // });
+                            await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName }, update)  
+                       
+                        }
                         } else {
 
                             if(result['Source name'] == " " || result['Source name'] == "" ){
@@ -126,6 +141,9 @@ exports.controversy = async function (req, res) {
                                 });
                             }
                             else{
+                                var sourcePublicationDate = new Date(Math.round((dateValue - 25569)*86400*1000)).toLocaleDateString()
+                               // console.log("//////",dateValue  , new Date(Math.round((dateValue - 25569)*86400*1000)).toLocaleDateString())
+                                
                                 await controversySchema.create({
 
                                     companyId: company.companyName,
@@ -138,7 +156,7 @@ exports.controversy = async function (req, res) {
                                         sourceName: result['Source name'],
                                         Textsnippet: result['Text snippet'],
                                         sourceURL: result.URL,
-                                        sourcePublicationDate: result['Source Publication Date']
+                                        sourcePublicationDate: sourcePublicationDate
                                     }]
     
                                 });
@@ -151,13 +169,6 @@ exports.controversy = async function (req, res) {
 
             }
 
-
-
-            //     for (let i = 0; i < standardData.resultArr.length - 1; i++) {
-            //         for (let j = 0; j < standardData.resultArr[i].length; j++) {
-            //             let c = await category.fileUploadControversy(company, standardData.resultArr[i][j]);
-            //         }
-            //     }
         }
 
         return res.status(200).json({
