@@ -179,7 +179,7 @@ exports.controversy = async function (req, res) {
 
         return res.status(200).json({
             message: 'Controversy file upload has been completed.',
-            companyID: companyID,
+            companyID: companyID[0],
             status: 200,
         });
     } catch (error) {
@@ -232,10 +232,6 @@ exports.getControvery = async function (req, res) {
             data: yearValues,
             status: 200,
         });
-
-
-
-
     } catch (error) {
         return res.status(403).json({
             message: error.message,
