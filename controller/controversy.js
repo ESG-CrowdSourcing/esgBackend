@@ -9,16 +9,13 @@ const { find, populate, db } = require('../model/companyTitle')
 
 exports.controversy = async function (req, res) {
     try {
+        let companyID ;
         for (let f = 0; f < req.files.length; f++) {
             let standardData = await multipleFileuploadController.sheetOne(req.files[f].path);
-
             let company = await category.companyTitle(standardData.companyArr[0]);
-
-            var array = standardData.resultArr[0]
-
             let companyValue = await companySchema.find({ companyName: company.companyName }).exec()
             if (companyValue.length < 0) {
-                let compayDetails = new companySchema({
+                companySchema.create({
                     companyName: company.companyName,
                     CIN: company.CIN,
                     NIC_Code: company.NIC_Code,
@@ -27,26 +24,35 @@ exports.controversy = async function (req, res) {
                     CMIE_ProwessCode: company.CMIE_ProwessCode,
                     NIC_industry: company.NIC_industry
                 })
-
-                compayDetails.save(function (err, result) {
-                    if (err) {
-                        console.log(err);
+            }
+            else {
+                var update = {
+                    $set: {
+                        companyName: company.companyName,
+                        CIN: company.CIN,
+                        NIC_Code: company.NIC_Code,
+                        ISIN_Code: company.ISIN_Code,
+                        NIC_industry: company.NIC_industry,
+                        CMIE_ProwessCode: company.CMIE_ProwessCode,
+                        NIC_industry: company.NIC_industry
                     }
-                    else {
-                        console.log(result)
-                    }
-                })
+                }
+                await companySchema.updateOne({ companyName: company.companyName, CIN: company.CIN }, update)
             }
             // standardData.resultArr[0].forEach( async( result ) => {
+            companyID = await companySchema.find({ companyName: company.companyName }).distinct('_id').exec()
+
             for (let index = 0; index < standardData.resultArr[0].length; index++) {
+
                 const result = standardData.resultArr[0][index];
                 // await Promise.all(standardData.resultArr[0].map( async( result ) => {
 
                 //   let responseCheck = await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName })
 
-                await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName })
+                await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID[0] })
                     .then(async (data) => {
                         var dateValue = result['Source Publication Date']
+
 
                         if (data.length > 0) {
                             let maxResponseValue = ''
@@ -82,8 +88,8 @@ exports.controversy = async function (req, res) {
                                 resRankValue = '';
                             }
 
-                            if (result['DP Code'] == 'DATN001'){
-                                console.log(" .............gggggghhhhh " ,result['Response'], currentMaxResponse , resRankValue  ,maxResponseValue)
+                            if (result['DP Code'] == 'DATN001') {
+                                console.log(" .............gggggghhhhh ", result['Response'], currentMaxResponse, resRankValue, maxResponseValue)
                             }
                             if (currentMaxResponse > resRank) {
                                 maxResponse = currentMaxResponse;
@@ -93,60 +99,60 @@ exports.controversy = async function (req, res) {
                                 maxResponseValue = resRankValue;
                             }
 
-                           if(maxResponse != 0){ 
-                            var sourcePublicationDate = new Date(Math.round((dateValue - 25569)*86400*1000)).toLocaleDateString()
-                           let sourceDate= await controversySchema.find({DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName, data:{$elemMatch: {sourcePublicationDate: sourcePublicationDate}}})
-                            console.log(" ............ " , sourceDate.length  , sourcePublicationDate)
-                            if(sourceDate.length < 1){
+                            if (maxResponse != 0) {
+                                var sourcePublicationDate = new Date(Math.round((dateValue - 25569) * 86400 * 1000)).toLocaleDateString()
+                                let sourceDate = await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID[0], data: { $elemMatch: { sourcePublicationDate: sourcePublicationDate } } })
+                                console.log(" ............ ", sourceDate.length, sourcePublicationDate)
+                                if (sourceDate.length < 1) {
+                                    var update = {
+                                        maxResponseValue: maxResponseValue,
+                                        $push: {
+                                            data: {
+                                                // response: result['Response'],
+                                                sourceName: result['Source name'],
+                                                sourceURL: result.URL,
+                                                Textsnippet: result['Text snippet'],
+                                                sourcePublicationDate: sourcePublicationDate
+
+                                            }
+                                        }
+                                    }
+                                    await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID[0] }, update)
+                                }
+
+                            }
+                            else {
                                 var update = {
                                     maxResponseValue: maxResponseValue,
                                     $push: {
-                                        data: {
-                                            // response: result['Response'],
-                                            sourceName: result['Source name'],
-                                            sourceURL: result.URL,
-                                            Textsnippet: result['Text snippet'],
-                                            sourcePublicationDate: sourcePublicationDate   
-    
-                                        }
+                                        data: []
                                     }
                                 }
-                                await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName }, update)  
+                                await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID }, update)
+
                             }
-                            
-                        }
-                        else{
-                            var update = {
-                                maxResponseValue: maxResponseValue,
-                                $push: {
-                                    data: []
-                                }
-                            }
-                            await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName }, update)  
-                       
-                        }
                         } else {
 
-                            if(result['Source name'] == " " || result['Source name'] == "" ){
+                            if (result['Source name'] == " " || result['Source name'] == "") {
                                 await controversySchema.create({
 
-                                    companyId: company.companyName,
+                                    companyId: companyID[0],
                                     year: result['Fiscal Year'],
                                     DPcode: result['DP Code'],
                                     unit: result['Unit'],
                                     // response: result['Response'],
                                     maxResponseValue: result['Response'],
                                     data: []
-    
+
                                 });
                             }
-                            else{
-                                var sourcePublicationDate = new Date(Math.round((dateValue - 25569)*86400*1000)).toLocaleDateString()
-                               // console.log("//////",dateValue  , new Date(Math.round((dateValue - 25569)*86400*1000)).toLocaleDateString())
-                                
+                            else {
+                                var sourcePublicationDate = new Date(Math.round((dateValue - 25569) * 86400 * 1000)).toLocaleDateString()
+                                // console.log("//////",dateValue  , new Date(Math.round((dateValue - 25569)*86400*1000)).toLocaleDateString())
+
                                 await controversySchema.create({
 
-                                    companyId: company.companyName,
+                                    companyId: companyID[0],
                                     year: result['Fiscal Year'],
                                     DPcode: result['DP Code'],
                                     unit: result['Unit'],
@@ -158,7 +164,7 @@ exports.controversy = async function (req, res) {
                                         sourceURL: result.URL,
                                         sourcePublicationDate: sourcePublicationDate
                                     }]
-    
+
                                 });
                             }
                         }
@@ -173,6 +179,7 @@ exports.controversy = async function (req, res) {
 
         return res.status(200).json({
             message: 'Controversy file upload has been completed.',
+            companyID: companyID,
             status: 200,
         });
     } catch (error) {
@@ -187,26 +194,14 @@ async function file(fiscal) {
     return new Promise(async (resolve, reject) => {
 
         var dataValues = [], datapoints = {};
-        for (let fi = 0; fi < fiscal.length; fi++) {
-            // if (fiscal[fi].maxResponseValue == " " || fiscal[fi].maxResponseValue == "") {
-            //     datapoints = {
-            //         Year: fiscal[fi].year,
-            //         DPCode: fiscal[fi].DPcode,
-            //         Response: fiscal[fi].maxResponseValue,
-            //         controversy: []
-            //     }
-            //     dataValues.push(datapoints);
-            // }
-           // else {
-               // console.log (" ,,,,,,,,, " , fiscal[fi])
-                datapoints = {
-                    Dpcode: fiscal[fi].DPcode,
-                    Year: fiscal[fi].year,
-                    ResponseUnit: fiscal[fi].maxResponseValue,
-                    controversy: fiscal[fi].data
-                }
-                dataValues.push(datapoints);
-           // }
+        for (let fi = 0; fi < fiscal.length; fi++) {            
+            datapoints = {
+                Dpcode: fiscal[fi].DPcode,
+                Year: fiscal[fi].year,
+                ResponseUnit: fiscal[fi].maxResponseValue,
+                controversy: fiscal[fi].data
+            }
+            dataValues.push(datapoints);
 
         }
         resolve(dataValues)
@@ -214,29 +209,27 @@ async function file(fiscal) {
 }
 
 exports.getControvery = async function (req, res) {
-
-    let data = [];
     var yearValues = [], yearData = {};
-
     try {
 
-        let companyName = await companySchema.find({ companyName: req.body.companyName }).exec()
-        //  let year = await controversySchema.find({ companyId: req.body.companyName }).distinct('year').exec()
-
-        // for (let yr = 0; yr < year.length; yr++) {
-        let fiscal = await controversySchema.find({ companyId: companyName[0].companyName, year: req.body.year }).exec()
+      //  let companyName = await companySchema.find({ _id: req.body.companyID }).exec()
+        let year = await controversySchema.find({ companyId: req.params.companyID }).distinct('year').exec()
+        
+        for (let yr = 0; yr < year.length; yr++) {
+        let fiscal = await controversySchema.find({ companyId: req.params.companyID, year: year[yr] }).exec()
         let f = await file(fiscal)
-     /*   yearData = {
-            year: req.body.year,
-            Data: f
-        }
-        yearValues.push(yearData)
-        */
-        // }
+        console.log(  fiscal.length , year  , year[yr])
+          yearData = {
+               year: year[yr],
+               Data: f
+           }
+           yearValues.push(yearData)
+           
+         }
         return res.status(200).json({
-            companyName: companyName[0].companyName,
-            CIN: companyName[0].CIN,
-            data: f,
+            // companyName: companyName[0].companyName,
+            // CIN: companyName[0].CIN,
+            data: yearValues,
             status: 200,
         });
 

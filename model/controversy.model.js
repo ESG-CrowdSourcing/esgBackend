@@ -2,63 +2,64 @@ var mongoose = require('mongoose');
 var schema = mongoose.Schema;
 const shortid = require('shortid');
 
-var subsSchema=new schema({
-    controversyId:{
+var subsSchema = new schema({
+    controversyId: {
         type: String,
-  default: shortid.generate
+        default: shortid.generate
     },
-   
-    sourceURL:{
+
+    sourceURL: {
         type: String
     },
-    sourcePublicationDate:{
+    sourcePublicationDate: {
         type: String
     },
-    sourceName:{
+    sourceName: {
         type: String
     },
-    Textsnippet:{
+    Textsnippet: {
         type: String
     }
-},{_id:0})
+}, { _id: 0 })
 
 var controversySchema = new schema({
-   
-    data:[subsSchema],
-    maxResponseValue:{
+
+    data: [subsSchema],
+    maxResponseValue: {
         type: String
     },
     year: {
         type: String
     },
-    DPcode:{
+    DPcode: {
         type: String
     },
-    unit:{
+    unit: {
         type: String
     },
-    companyId:{
+    companyId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CompanyTitle'
+    },
+    submittedDate: {
         type: String
     },
-    submittedDate:{
-        type: String
-    },
-    submittedDate:{
+    submittedDate: {
         type: Date, default: Date.now
     },
-    activeSatus:{
+    activeSatus: {
         type: String,
-        default:'active'
+        default: 'active'
     },
-    lastModifiedBy:{
+    lastModifiedBy: {
         type: String
     },
-    lastModifiedDate:{
+    lastModifiedDate: {
         type: Date, default: Date.now
     },
-   
-    
- 
+
+
+
 });
 
 module.exports = mongoose.model('controversy', controversySchema);

@@ -487,7 +487,7 @@ function minusValue(arrNum, arrDen) {
                             directors.push(data)
                         }
                         else {
-                            let ss1 = getJsDateFromExcel(arrNum[i].value)
+                                let ss1 = getJsDateFromExcel(arrNum[i].value)
                             let ss2;
                             if (arrDen[j].value == ' ') {
                                 ss2 = getJsDateFromExcel(arrDen[j].fiscalYearEnddate)
