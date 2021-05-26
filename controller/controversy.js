@@ -40,7 +40,7 @@ exports.controversy = async function (req, res) {
                 await companySchema.updateOne({ companyName: company.companyName, CIN: company.CIN }, update)
             }
             // standardData.resultArr[0].forEach( async( result ) => {
-            companyID = await companySchema.find({ companyName: company.companyName }).distinct('_id').exec()
+            companyID = await companySchema.find({ companyName: company.companyName }).exec()
 
             for (let index = 0; index < standardData.resultArr[0].length; index++) {
 
@@ -49,7 +49,7 @@ exports.controversy = async function (req, res) {
 
                 //   let responseCheck = await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: company.companyName })
 
-                await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID[0] })
+                await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID[0]._id })
                     .then(async (data) => {
                         var dateValue = result['Source Publication Date']
 
@@ -101,7 +101,7 @@ exports.controversy = async function (req, res) {
 
                             if (maxResponse != 0) {
                                 var sourcePublicationDate = new Date(Math.round((dateValue - 25569) * 86400 * 1000)).toLocaleDateString()
-                                let sourceDate = await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID[0], data: { $elemMatch: { sourcePublicationDate: sourcePublicationDate } } })
+                                let sourceDate = await controversySchema.find({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID[0]._id, data: { $elemMatch: { sourcePublicationDate: sourcePublicationDate } } })
                                 console.log(" ............ ", sourceDate.length, sourcePublicationDate)
                                 if (sourceDate.length < 1) {
                                     var update = {
@@ -117,7 +117,7 @@ exports.controversy = async function (req, res) {
                                             }
                                         }
                                     }
-                                    await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID[0] }, update)
+                                    await controversySchema.updateMany({ DPcode: result['DP Code'], year: result['Fiscal Year'], companyId: companyID[0]._id }, update)
                                 }
 
                             }
@@ -136,7 +136,7 @@ exports.controversy = async function (req, res) {
                             if (result['Source name'] == " " || result['Source name'] == "") {
                                 await controversySchema.create({
 
-                                    companyId: companyID[0],
+                                    companyId: companyID[0]._id,
                                     year: result['Fiscal Year'],
                                     DPcode: result['DP Code'],
                                     unit: result['Unit'],
@@ -152,7 +152,7 @@ exports.controversy = async function (req, res) {
 
                                 await controversySchema.create({
 
-                                    companyId: companyID[0],
+                                    companyId: companyID[0]._id,
                                     year: result['Fiscal Year'],
                                     DPcode: result['DP Code'],
                                     unit: result['Unit'],
@@ -179,7 +179,7 @@ exports.controversy = async function (req, res) {
 
         return res.status(200).json({
             message: 'Controversy file upload has been completed.',
-            companyID: companyID[0],
+            companyID: companyID[0]._id,
             status: 200,
         });
     } catch (error) {
@@ -212,7 +212,7 @@ exports.getControvery = async function (req, res) {
     var yearValues = [], yearData = {};
     try {
 
-      //  let companyName = await companySchema.find({ _id: req.body.companyID }).exec()
+        let companyDetails = await companySchema.find({ _id: req.params.companyID }).exec()
         let year = await controversySchema.find({ companyId: req.params.companyID }).distinct('year').exec()
         
         for (let yr = 0; yr < year.length; yr++) {
@@ -227,7 +227,7 @@ exports.getControvery = async function (req, res) {
            
          }
         return res.status(200).json({
-            // companyName: companyName[0].companyName,
+            companyDetails: companyDetails[0],
             // CIN: companyName[0].CIN,
             data: yearValues,
             status: 200,
