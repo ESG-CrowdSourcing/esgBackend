@@ -30,7 +30,7 @@ module.exports = function (app) {
 
     app.route('/master').post(xslx.single('file'),master.masterTaxonomy);
     app.route('/taxonomy').post(xslx.array('file', 40), cmpany.companyDetails);
-    app.route('/controversy').post(xslx.array('file',2),controversy.controversy);
+    app.route('/controversy').post(xslx.array('file',25),controversy.controversy);
     app.route('/getcontroversy/:companyID').get(controversy.getControvery);
     app.route('/rule').post(xslx.single('file'),cmpany.rule);
     app.route('/calculation/:companyName').post(calculation.calc)
