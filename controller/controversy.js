@@ -218,17 +218,15 @@ exports.getControvery = async function (req, res) {
         for (let yr = 0; yr < year.length; yr++) {
         let fiscal = await controversySchema.find({ companyId: req.params.companyID, year: year[yr] }).exec()
         let f = await file(fiscal)
-        console.log(  fiscal.length , year  , year[yr])
           yearData = {
                year: year[yr],
+              companyName:companyDetails[0].companyName,
                Data: f
            }
            yearValues.push(yearData)
            
          }
         return res.status(200).json({
-            companyDetails: companyDetails[0],
-            // CIN: companyName[0].CIN,
             data: yearValues,
             status: 200,
         });
